@@ -24,7 +24,7 @@ public class UserAccountsService
     public async Task CreateAsync(UserAccount newUserAccount) =>
         await _userAccountsCollection.InsertOneAsync(newUserAccount);
 
-    public async Task CreateManyAsync(List<UserAccount> newUserAccounts) =>
+    public async Task CreateManyAsync(IEnumerable<UserAccount> newUserAccounts) =>
         await _userAccountsCollection.InsertManyAsync(newUserAccounts);
 
     public async Task UpdateAsync(string id, UserAccount updatedUserAccount) =>

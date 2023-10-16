@@ -1,20 +1,22 @@
 using MicroBlog.DataHandling;
 using MicroBlog.Models;
 using MicroBlog.Services;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-// add mongo db
+
 builder.Services.Configure<MicroBlogDatabaseSettings>(
     builder.Configuration.GetSection("MicroBlogDatabase"));
+builder.Services.Configure<DatasetPathSettings>(
+    builder.Configuration.GetSection("DatasetPath"));
+
 builder.Services.AddSingleton<MongoDbService>();
 builder.Services.AddSingleton<UserAccountsService>();
+builder.Services.AddSingleton<MessagesService>();
 
 var app = builder.Build();
 
@@ -25,10 +27,19 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.MapGet("/load-users", async (UserAccountsService userAccountsService) =>
+app.MapGet("/load-users", async (UserAccountsService userAccountsService, 
+    IOptions<DatasetPathSettings> datasetPath) =>
 {
-    await DatasetLoader.LoadUsers(userAccountsService);
+    await DatasetLoader.LoadUsers(userAccountsService, datasetPath);
 });
+
+app.MapGet("/load-messages", async (MessagesService messagesService, 
+    IOptions<DatasetPathSettings> datasetPath) =>
+{
+    await DatasetLoader.LoadMessages(messagesService, datasetPath);
+});
+
+app.MapGet("/",  (IOptions<DatasetPathSettings> datasetPath) => "Hello, MicroBlog!");
 
 app.UseHttpsRedirection();
 

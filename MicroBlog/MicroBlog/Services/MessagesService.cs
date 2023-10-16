@@ -24,7 +24,7 @@ public class MessagesService
     public async Task CreateAsync(Message newMessage) =>
         await _messagesCollection.InsertOneAsync(newMessage);
 
-    public async Task CreateManyAsync(List<Message> messages) =>
+    public async Task CreateManyAsync(IEnumerable<Message> messages) =>
         await _messagesCollection.InsertManyAsync(messages);
 
     public async Task UpdateAsync(string id, Message updatedMessage) =>
