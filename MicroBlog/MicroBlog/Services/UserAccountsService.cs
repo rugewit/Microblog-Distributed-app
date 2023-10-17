@@ -6,6 +6,7 @@ namespace MicroBlog.Services;
 
 public class UserAccountsService
 {
+    public int GetAllDocsLimit { get; set; } = 200;
     private readonly IMongoCollection<UserAccount> _userAccountsCollection;
     
     public UserAccountsService(MongoDbService mongoDbService, 
@@ -16,7 +17,10 @@ public class UserAccountsService
     }
     
     public async Task<List<UserAccount>> GetAsync() =>
-        await _userAccountsCollection.Find(_ => true).ToListAsync();
+        await _userAccountsCollection.Find(_ => true).Limit(GetAllDocsLimit).ToListAsync();
+    
+    public async Task<List<UserAccount>> GetLimitedAsync(int limit) =>
+        await _userAccountsCollection.Find(_ => true).Limit(limit).ToListAsync();
 
     public async Task<UserAccount?> GetAsync(string id) =>
         await _userAccountsCollection.Find(x => x.Id == id).FirstOrDefaultAsync();

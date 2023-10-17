@@ -17,6 +17,7 @@ builder.Services.Configure<DatasetPathSettings>(
 builder.Services.AddSingleton<MongoDbService>();
 builder.Services.AddSingleton<UserAccountsService>();
 builder.Services.AddSingleton<MessagesService>();
+builder.Services.AddSingleton(new RedisService("localhost"));
 
 var app = builder.Build();
 
@@ -39,7 +40,13 @@ app.MapGet("/load-messages", async (MessagesService messagesService,
     await DatasetLoader.LoadMessages(messagesService, datasetPath);
 });
 
-app.MapGet("/",  (IOptions<DatasetPathSettings> datasetPath) => "Hello, MicroBlog!");
+app.MapGet("/redis",  async (RedisService redisService) =>
+{
+    var redisDb = redisService.GetRedisDB();
+    await redisDb.StringSetAsync("Ivan", "Petrov");
+});
+
+app.MapGet("/",  () => "Hello, MicroBlog!");
 
 app.UseHttpsRedirection();
 

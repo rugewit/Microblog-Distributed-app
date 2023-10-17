@@ -44,3 +44,6 @@
 /home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/MicroBlog/bin/Debug/net7.0/runtimes/linux/native/libmongocrypt.so
 /home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/MicroBlog/bin/Debug/net7.0/runtimes/osx/native/libmongocrypt.dylib
 /home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/MicroBlog/bin/Debug/net7.0/runtimes/win/native/mongocrypt.dll
+/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/MicroBlog/bin/Debug/net7.0/NRedisStack.dll
+/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/MicroBlog/bin/Debug/net7.0/Pipelines.Sockets.Unofficial.dll
+/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/MicroBlog/bin/Debug/net7.0/StackExchange.Redis.dll

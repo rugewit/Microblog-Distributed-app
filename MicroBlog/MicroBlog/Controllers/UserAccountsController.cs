@@ -18,6 +18,10 @@ public class UserAccountsController : ControllerBase
     [HttpGet]
     public async Task<List<UserAccount>> Get() =>
         await _userAccountsService.GetAsync();
+    
+    [HttpGet("{limit}")]
+    public async Task<List<UserAccount>> Get(int limit) =>
+        await _userAccountsService.GetLimitedAsync(limit);
 
     [HttpGet("{id:length(24)}")]
     public async Task<ActionResult<UserAccount>> Get(string id)
