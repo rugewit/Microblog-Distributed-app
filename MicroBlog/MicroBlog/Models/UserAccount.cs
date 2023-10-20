@@ -55,5 +55,5 @@ public class UserCollection
 {
    [XmlArray("users")]
    [XmlArrayItem("row", typeof(UserAccount))]
-   public UserAccount[] UserAccounts { get; set; }
+   public UserAccount[]? UserAccounts { get; set; }
 }

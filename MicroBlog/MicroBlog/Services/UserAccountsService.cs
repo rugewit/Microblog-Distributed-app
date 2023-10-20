@@ -4,12 +4,12 @@ using MongoDB.Driver;
 
 namespace MicroBlog.Services;
 
-public class UserAccountsService
+public class UserAccountsService : IUserAccountsService
 {
     public int GetAllDocsLimit { get; set; } = 200;
     private readonly IMongoCollection<UserAccount> _userAccountsCollection;
     
-    public UserAccountsService(MongoDbService mongoDbService, 
+    public UserAccountsService(IMongoDbService mongoDbService, 
         IOptions<MicroBlogDatabaseSettings> databaseSettings)
     {
         var collectionName = databaseSettings.Value.UserAccountsCollectionName;

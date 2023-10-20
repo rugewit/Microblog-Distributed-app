@@ -66,5 +66,5 @@ public class MessageCollection
 {
     [XmlArray("posts")]
     [XmlArrayItem("row", typeof(Message))]
-    public Message[] Messages { get; set; }
+    public Message[]? Messages { get; set; }
 }

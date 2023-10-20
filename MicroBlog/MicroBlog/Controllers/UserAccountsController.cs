@@ -8,9 +8,9 @@ namespace MicroBlog.Controllers;
 [Route("api/[controller]")]
 public class UserAccountsController : ControllerBase
 {
-    private readonly UserAccountsService _userAccountsService;
+    private readonly IUserAccountsService _userAccountsService;
 
-    public UserAccountsController(UserAccountsService userAccountsService)
+    public UserAccountsController(IUserAccountsService userAccountsService)
     {
         _userAccountsService = userAccountsService;
     }
@@ -47,7 +47,7 @@ public class UserAccountsController : ControllerBase
     [HttpPost("multiple")]
     public async Task<IActionResult> PostMany(List<UserAccount> newUserAccounts)
     {
-        if (newUserAccounts == null || newUserAccounts.Count == 0)
+        if (newUserAccounts.Count == 0)
         {
             return BadRequest("No user accounts provided for insertion.");
         }

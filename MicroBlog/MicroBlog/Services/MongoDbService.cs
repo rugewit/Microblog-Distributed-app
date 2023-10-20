@@ -4,7 +4,7 @@ using MongoDB.Driver;
 
 namespace MicroBlog.Services;
 
-public class MongoDbService
+public class MongoDbService : IMongoDbService
 {
     public IMongoDatabase MongoDatabase { get; }
 

@@ -8,9 +8,9 @@ namespace MicroBlog.Controllers;
 [Route("api/[controller]")]
 public class MessagesController : ControllerBase
 {
-    private readonly MessagesService _messagesService;
+    private readonly IMessagesService _messagesService;
 
-    public MessagesController(MessagesService messagesService)
+    public MessagesController(IMessagesService messagesService)
     {
         _messagesService = messagesService;
     }
@@ -47,7 +47,7 @@ public class MessagesController : ControllerBase
     [HttpPost("multiple")]
     public async Task<IActionResult> PostMany(List<Message> newMessages)
     {
-        if (newMessages == null || newMessages.Count == 0)
+        if (newMessages.Count == 0)
         {
             return BadRequest("No messages provided for insertion.");
         }

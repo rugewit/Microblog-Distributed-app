@@ -12,5 +12,3 @@ a = {
     "DownVotes":"217539",
     "AccountId":"-1"
 }
-
-

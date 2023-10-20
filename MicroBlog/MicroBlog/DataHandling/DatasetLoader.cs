@@ -8,7 +8,7 @@ namespace MicroBlog.DataHandling;
 
 public static class DatasetLoader
 {
-    public static async Task LoadUsers(UserAccountsService userAccountsService,
+    public static async Task LoadUsers(IUserAccountsService userAccountsService,
         IOptions<DatasetPathSettings> datasetPath)
     {
         var watch = System.Diagnostics.Stopwatch.StartNew();
@@ -34,7 +34,7 @@ public static class DatasetLoader
     }
     
     
-     public static async Task LoadMessages(MessagesService messagesService, 
+     public static async Task LoadMessages(IMessagesService messagesService, 
          IOptions<DatasetPathSettings> datasetPath)
     {
         var watch = System.Diagnostics.Stopwatch.StartNew();

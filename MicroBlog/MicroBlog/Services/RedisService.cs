@@ -2,7 +2,7 @@ using StackExchange.Redis;
 
 namespace MicroBlog.Services;
 
-public class RedisService
+public class RedisService : IRedisService
 {
     private readonly IDatabase _db;
     
@@ -12,7 +12,7 @@ public class RedisService
         _db = redis.GetDatabase();
     }
 
-    public IDatabase GetRedisDB()
+    public IDatabase GetRedisDb()
     {
         return _db;
     }
