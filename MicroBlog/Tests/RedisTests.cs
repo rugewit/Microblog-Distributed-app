@@ -1,42 +1,15 @@
-using MicroBlog.Models;
 using MicroBlog.Services;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Tests;
 
 public class RedisTests
 {
-    private WebApplication? _app;
-    
-    private WebApplication GetApp()
-    {
-        var builder = WebApplication.CreateBuilder();
-
-        builder.Services.AddControllers();
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
-
-        builder.Services.Configure<MicroBlogDatabaseSettings>(
-            builder.Configuration.GetSection("MicroBlogDatabase"));
-        builder.Services.Configure<DatasetPathSettings>(
-            builder.Configuration.GetSection("DatasetPath"));
-
-        builder.Services.AddSingleton<MongoDbService>();
-        builder.Services.AddSingleton<UserAccountsService>();
-        builder.Services.AddSingleton<MessagesService>();
-        builder.Services.AddSingleton(new RedisService("localhost"));
-        
-        var app = builder.Build();
-        return app;
-    }
-    
-    
     [Fact]
     public void SetAndGet()
     {
-        _app = null ?? GetApp();
-        var redisDb = _app.Services.GetRequiredService<IRedisService>().GetRedisDb();
+        var app = WebAppForTest.GetTestApp();
+        var redisDb = app.Services.GetRequiredService<IRedisService>().GetRedisDb();
 
         var pair1 = new { key = "Ivan", value = "Petrov" };
         var pair2 = new { key = "Ivan1", value = "Petrov2" };

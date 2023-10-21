@@ -1,24 +1,12 @@
 using MicroBlog.DataHandling;
 using MicroBlog.Models;
 using MicroBlog.Services;
+using MicroBlog.WebAppConfigs;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-// mongo db configuration
-builder.Services.Configure<MicroBlogDatabaseSettings>(
-    builder.Configuration.GetSection("MicroBlogDatabase"));
-// datasets path configuration
-builder.Services.Configure<DatasetPathSettings>(
-    builder.Configuration.GetSection("DatasetPath"));
-
-builder.Services.AddSingleton<MongoDbService>();
-builder.Services.AddSingleton<UserAccountsService>();
-builder.Services.AddSingleton<MessagesService>();
-builder.Services.AddSingleton(new RedisService("localhost"));
+BuilderSetUp.SetUp(builder);
 
 var app = builder.Build();
 
@@ -43,8 +31,13 @@ if (app.Environment.IsDevelopment())
     app.MapGet("/redis",  async (IRedisService redisService) =>
     {
         var redisDb = redisService.GetRedisDb();
+        
         await redisDb.StringSetAsync("Ivan", "Petrov");
         await redisDb.StringSetAsync("Ivan1", "Petrov2");
+        
+        var res1 = await redisDb.StringGetAsync("Ivan");
+        var res2 = await redisDb.StringGetAsync("Ivan1");
+        return $"Ivan={res1}\nIvan1={res2}";
     });
 }
 
