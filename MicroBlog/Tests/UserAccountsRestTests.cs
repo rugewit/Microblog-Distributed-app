@@ -22,6 +22,7 @@ public class UserAccountsRestTests
         var app = WebAppForTest.GetTestApp();
 
         var userService = app.Services.GetRequiredService<IUserAccountsService>();
+        var redisDb = app.Services.GetRequiredService<IRedisService>().GetRedisDb();
         
         var controller = new UserAccountsController(userService);
 
@@ -50,11 +51,16 @@ public class UserAccountsRestTests
         var gotId = gotUserAccount.Value?.Id;
         Assert.Equal(id, gotId);
         
-        // Delete
+        // Delete (in fact, from the mongo db)
         await controller.Delete(id);
+        // and delete from the redis
+        await redisDb.KeyDeleteAsync(id);
         
         // try to get the user acc again
         var gotResult = await controller.Get(id);
+
+        var resStr = gotResult.Result is null ? "yes" : "no";
+        _testOutputHelper.WriteLine("gotResult: " + resStr);
         Assert.IsType<NotFoundResult>(gotResult.Result);
     }
 }
