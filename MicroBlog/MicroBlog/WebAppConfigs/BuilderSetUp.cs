@@ -20,6 +20,6 @@ public static class BuilderSetUp
         builder.Services.AddSingleton<IMongoDbService, MongoDbService>();
         builder.Services.AddSingleton<IUserAccountsService, UserAccountsService>();
         builder.Services.AddSingleton<IMessagesService, MessagesService>();
-        builder.Services.AddSingleton<IRedisService>(new RedisService("localhost"));
+        builder.Services.AddSingleton<IRedisService>(new RedisService("localhost,allowAdmin=true"));
     }
 }

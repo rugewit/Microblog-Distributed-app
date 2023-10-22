@@ -1,6 +1,8 @@
 using MicroBlog.Models;
 using MicroBlog.Services;
 using Microsoft.AspNetCore.Mvc;
+using StackExchange.Redis;
+using MongoUtils = MicroBlog.Utils.MongoUtils;
 
 namespace MicroBlog.Controllers;
 
@@ -19,14 +21,28 @@ public class UserAccountsController : ControllerBase
     public async Task<List<UserAccount>> Get() =>
         await _userAccountsService.GetAsync();
     
-    [HttpGet("{limit}")]
+    [HttpGet("{limit:int}")]
     public async Task<List<UserAccount>> Get(int limit) =>
         await _userAccountsService.GetLimitedAsync(limit);
 
     [HttpGet("{id:length(24)}")]
     public async Task<ActionResult<UserAccount>> Get(string id)
     {
+        if (!MongoUtils.IsValidMongoId(id))
+        {
+            return BadRequest("invalid mongo id has been provided");
+        }
+        
         var userAccount = await _userAccountsService.GetAsync(id);
+
+        if (userAccount is null)
+        {
+            Console.WriteLine("UserAcc is null");
+        }
+        else
+        {
+            Console.WriteLine("UserAcc is not null");
+        }
 
         if (userAccount is null)
         {
@@ -63,6 +79,10 @@ public class UserAccountsController : ControllerBase
     [HttpPut("{id:length(24)}")]
     public async Task<IActionResult> Update(string id, UserAccount updatedUserAccount)
     {
+        if (!MongoUtils.IsValidMongoId(id))
+        {
+            return BadRequest("invalid mongo id has been provided");
+        }
         var userAccount = await _userAccountsService.GetAsync(id);
 
         if (userAccount is null)
@@ -80,6 +100,10 @@ public class UserAccountsController : ControllerBase
     [HttpDelete("{id:length(24)}")]
     public async Task<IActionResult> Delete(string id)
     {
+        if (!MongoUtils.IsValidMongoId(id))
+        {
+            return BadRequest("invalid mongo id has been provided");
+        }
         var userAccount = await _userAccountsService.GetAsync(id);
         
         if (userAccount is null)

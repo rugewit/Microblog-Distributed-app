@@ -1,6 +1,7 @@
 using MicroBlog.Models;
 using MicroBlog.Services;
 using Microsoft.AspNetCore.Mvc;
+using MongoUtils = MicroBlog.Utils.MongoUtils;
 
 namespace MicroBlog.Controllers;
 
@@ -26,6 +27,11 @@ public class MessagesController : ControllerBase
     [HttpGet("{id:length(24)}")]
     public async Task<ActionResult<Message>> Get(string id)
     {
+        if (!MongoUtils.IsValidMongoId(id))
+        {
+            return BadRequest("invalid mongo id has been provided");
+        }
+        
         var message = await _messagesService.GetAsync(id);
 
         if (message is null)
@@ -63,6 +69,10 @@ public class MessagesController : ControllerBase
     [HttpPut("{id:length(24)}")]
     public async Task<IActionResult> Update(string id, Message updatedMessage)
     {
+        if (!MongoUtils.IsValidMongoId(id))
+        {
+            return BadRequest("invalid mongo id has been provided");
+        }
         var message = await _messagesService.GetAsync(id);
 
         if (message is null)
@@ -80,6 +90,10 @@ public class MessagesController : ControllerBase
     [HttpDelete("{id:length(24)}")]
     public async Task<IActionResult> Delete(string id)
     {
+        if (!MongoUtils.IsValidMongoId(id))
+        {
+            return BadRequest("invalid mongo id has been provided");
+        }
         var message = await _messagesService.GetAsync(id);
         
         if (message is null)
