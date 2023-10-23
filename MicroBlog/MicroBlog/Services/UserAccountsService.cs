@@ -29,23 +29,23 @@ public class UserAccountsService : IUserAccountsService
 
     public async Task<UserAccount?> GetAsync(string id)
     {
-        UserAccount? userAccount = null;
-        // try to get userAccount from the redis cache
-        var userAccountRedisValue = await _redisDb.StringGetAsync(id);
-        if (!userAccountRedisValue.IsNull)
+        UserAccount? userAccount;
+        if (await _redisDb.KeyExistsAsync(id))
         {
+            var userAccountRedisValue = await _redisDb.StringGetAsync(id);
             userAccount = JsonSerializer.Deserialize<UserAccount>(userAccountRedisValue.ToString());
+            Console.WriteLine("got from redis");
         }
-        if (userAccount is not null) return userAccount;
-        // if an user account isn't in the redis cache
-        userAccount = await _userAccountsCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
-        // if is found from the db
-        if (userAccount != null)
+        else
         {
-            var userAccountString = JsonSerializer.Serialize(userAccount);
-            await _redisDb.StringSetAsync(id, userAccountString);
+            userAccount = await _userAccountsCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
+            if (userAccount != null)
+            {
+                var userAccountString = JsonSerializer.Serialize(userAccount);
+                await _redisDb.StringSetAsync(id, userAccountString);
+                Console.WriteLine("got from db");
+            }
         }
-
         return userAccount;
     }
     
@@ -57,17 +57,18 @@ public class UserAccountsService : IUserAccountsService
 
     public async Task UpdateAsync(string id, UserAccount updatedUserAccount)
     {
-        // block user Account if it is in the redis cache
+        // lock user Account if it is in the redis cache
         if (await _redisDb.KeyExistsAsync(id))
         {
             var lockId = id + "1";
-            var longOperationTime = TimeSpan.FromMinutes(5);
+            var longOperationTime = TimeSpan.FromMinutes(1);
             
-            if (await _redisDb.LockTakeAsync(lockId, LockIdentifier, 
-                    longOperationTime + TimeSpan.FromMinutes(5)))
+            if (await _redisDb.LockTakeAsync(lockId, LockIdentifier,
+                    longOperationTime + TimeSpan.FromMinutes(1)))
             {
-                await _userAccountsCollection.ReplaceOneAsync(x => x.Id == id, updatedUserAccount);
                 await Task.Delay(longOperationTime);
+                await _userAccountsCollection.ReplaceOneAsync(x => x.Id == id, updatedUserAccount);
+                await _redisDb.StringSetAsync(id, JsonSerializer.Serialize(updatedUserAccount));
                 if (!await _redisDb.LockReleaseAsync(lockId, LockIdentifier))
                 {
                     Console.WriteLine($"Cannot unlock the lock,\nUserAccount={id},\nLockId={lockId}");
@@ -81,10 +82,20 @@ public class UserAccountsService : IUserAccountsService
         }
         else
         { 
+            // replace in the mongo db
             await _userAccountsCollection.ReplaceOneAsync(x => x.Id == id, updatedUserAccount);
+            // set in redis
+            await _redisDb.StringSetAsync(id, JsonSerializer.Serialize(updatedUserAccount));
         }
     }
-    
-    public async Task RemoveAsync(string id) =>
+
+    public async Task RemoveAsync(string id)
+    {
+        if (await _redisDb.KeyExistsAsync(id))
+        {
+            await _redisDb.StringGetDeleteAsync(id);
+        }
         await _userAccountsCollection.DeleteOneAsync(x => x.Id == id);
+        
+    }
 }
