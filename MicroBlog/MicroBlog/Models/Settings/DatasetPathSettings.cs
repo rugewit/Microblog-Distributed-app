@@ -1,4 +1,4 @@
-namespace MicroBlog.Models;
+namespace MicroBlog.Models.Settings;
 
 public class DatasetPathSettings
 {

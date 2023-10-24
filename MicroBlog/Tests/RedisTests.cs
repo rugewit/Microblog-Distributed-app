@@ -1,6 +1,7 @@
 using System.Text.Json;
 using MicroBlog.Controllers;
 using MicroBlog.Models;
+using MicroBlog.Models.Settings;
 using MicroBlog.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;

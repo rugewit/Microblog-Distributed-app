@@ -1,5 +1,6 @@
 using MicroBlog.DataHandling;
 using MicroBlog.Models;
+using MicroBlog.Models.Settings;
 using MicroBlog.Services;
 using MicroBlog.WebAppConfigs;
 using Microsoft.Extensions.Options;

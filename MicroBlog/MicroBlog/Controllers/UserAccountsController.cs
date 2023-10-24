@@ -34,16 +34,7 @@ public class UserAccountsController : ControllerBase
         }
         
         var userAccount = await _userAccountsService.GetAsync(id);
-
-        if (userAccount is null)
-        {
-            Console.WriteLine("UserAcc is null");
-        }
-        else
-        {
-            Console.WriteLine("UserAcc is not null");
-        }
-
+        
         if (userAccount is null)
         {
             return NotFound();

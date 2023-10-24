@@ -1,4 +1,5 @@
 using MicroBlog.Models;
+using MicroBlog.Models.Settings;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 

@@ -1,6 +1,7 @@
 using System.Xml;
 using System.Xml.Serialization;
 using MicroBlog.Models;
+using MicroBlog.Models.Settings;
 using MicroBlog.Services;
 using Microsoft.Extensions.Options;
 

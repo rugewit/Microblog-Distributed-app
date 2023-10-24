@@ -1,5 +1,6 @@
 using System.Text.Json;
 using MicroBlog.Models;
+using MicroBlog.Models.Settings;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using StackExchange.Redis;
@@ -11,14 +12,19 @@ public class UserAccountsService : IUserAccountsService
     public int GetAllDocsLimit { get; set; } = 200;
     private readonly IMongoCollection<UserAccount> _userAccountsCollection;
     private readonly IDatabase _redisDb;
+    private readonly int _userAccExpireTimeSec;
+    private readonly int _redactionTimeSimulationSec;
     private const string LockIdentifier = "hfgf234832645tfedf";
     
     public UserAccountsService(IMongoDbService mongoDbService, 
-        IOptions<MicroBlogDatabaseSettings> databaseSettings, IRedisService redisService)
+        IOptions<MicroBlogDatabaseSettings> databaseSettings, IRedisService redisService,
+        IOptions<UserAccountsExpirePolicySettings> userAccExpireSettings)
     {
         var collectionName = databaseSettings.Value.UserAccountsCollectionName;
         _userAccountsCollection = mongoDbService.MongoDatabase.GetCollection<UserAccount>(collectionName);
         _redisDb = redisService.GetRedisDb();
+        _userAccExpireTimeSec = userAccExpireSettings.Value.UserAccountCacheExpireTimeSec;
+        _redactionTimeSimulationSec = userAccExpireSettings.Value.RedactionTimeSimulationSec;
     }
     
     public async Task<List<UserAccount>> GetAsync() =>
@@ -42,7 +48,8 @@ public class UserAccountsService : IUserAccountsService
             if (userAccount != null)
             {
                 var userAccountString = JsonSerializer.Serialize(userAccount);
-                await _redisDb.StringSetAsync(id, userAccountString);
+                await _redisDb.StringSetAsync(id, userAccountString, 
+                    TimeSpan.FromSeconds(_userAccExpireTimeSec));
                 Console.WriteLine("got from db");
             }
         }
@@ -61,12 +68,12 @@ public class UserAccountsService : IUserAccountsService
         if (await _redisDb.KeyExistsAsync(id))
         {
             var lockId = id + "1";
-            var longOperationTime = TimeSpan.FromMinutes(1);
+            var redactionSimulationTime = TimeSpan.FromSeconds(_redactionTimeSimulationSec);
             
             if (await _redisDb.LockTakeAsync(lockId, LockIdentifier,
-                    longOperationTime + TimeSpan.FromMinutes(1)))
+                    redactionSimulationTime * 2))
             {
-                await Task.Delay(longOperationTime);
+                await Task.Delay(redactionSimulationTime);
                 await _userAccountsCollection.ReplaceOneAsync(x => x.Id == id, updatedUserAccount);
                 await _redisDb.StringSetAsync(id, JsonSerializer.Serialize(updatedUserAccount));
                 if (!await _redisDb.LockReleaseAsync(lockId, LockIdentifier))
