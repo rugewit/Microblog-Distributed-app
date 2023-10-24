@@ -14,6 +14,7 @@ public class UserAccountsService : IUserAccountsService
     private readonly IDatabase _redisDb;
     private readonly int _userAccExpireTimeSec;
     private readonly int _redactionTimeSimulationSec;
+    // some random identifier for the redis lock
     private const string LockIdentifier = "hfgf234832645tfedf";
     
     public UserAccountsService(IMongoDbService mongoDbService, 
@@ -67,6 +68,8 @@ public class UserAccountsService : IUserAccountsService
         // lock user Account if it is in the redis cache
         if (await _redisDb.KeyExistsAsync(id))
         {
+            // redis doesn't want to lock by an userAcc id
+            // so it's a workaround: add "1" or any other symbol to an actual userAcc id
             var lockId = id + "1";
             var redactionSimulationTime = TimeSpan.FromSeconds(_redactionTimeSimulationSec);
             
