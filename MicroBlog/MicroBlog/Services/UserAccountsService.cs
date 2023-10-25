@@ -78,7 +78,7 @@ public class UserAccountsService : IUserAccountsService
             {
                 await Task.Delay(redactionSimulationTime);
                 await _userAccountsCollection.ReplaceOneAsync(x => x.Id == id, updatedUserAccount);
-                await _redisDb.StringSetAsync(id, JsonSerializer.Serialize(updatedUserAccount));
+                await _redisDb.KeyDeleteAsync(id);
                 if (!await _redisDb.LockReleaseAsync(lockId, LockIdentifier))
                 {
                     Console.WriteLine($"Cannot unlock the lock,\nUserAccount={id},\nLockId={lockId}");
@@ -94,8 +94,6 @@ public class UserAccountsService : IUserAccountsService
         { 
             // replace in the mongo db
             await _userAccountsCollection.ReplaceOneAsync(x => x.Id == id, updatedUserAccount);
-            // set in redis
-            await _redisDb.StringSetAsync(id, JsonSerializer.Serialize(updatedUserAccount));
         }
     }
 
