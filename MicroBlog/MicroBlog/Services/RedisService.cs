@@ -1,3 +1,4 @@
+using MicroBlog.Services.Interfaces;
 using StackExchange.Redis;
 
 namespace MicroBlog.Services;

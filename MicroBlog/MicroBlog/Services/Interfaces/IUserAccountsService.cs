@@ -1,6 +1,6 @@
 using MicroBlog.Models;
 
-namespace MicroBlog.Services;
+namespace MicroBlog.Services.Interfaces;
 
 public interface IUserAccountsService
 {

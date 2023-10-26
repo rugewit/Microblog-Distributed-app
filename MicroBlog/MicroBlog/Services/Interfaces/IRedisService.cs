@@ -1,6 +1,6 @@
 using StackExchange.Redis;
 
-namespace MicroBlog.Services;
+namespace MicroBlog.Services.Interfaces;
 
 public interface IRedisService
 {

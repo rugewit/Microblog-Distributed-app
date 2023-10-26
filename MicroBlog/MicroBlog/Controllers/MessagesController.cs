@@ -1,5 +1,5 @@
 using MicroBlog.Models;
-using MicroBlog.Services;
+using MicroBlog.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using MongoUtils = MicroBlog.Utils.MongoUtils;
 

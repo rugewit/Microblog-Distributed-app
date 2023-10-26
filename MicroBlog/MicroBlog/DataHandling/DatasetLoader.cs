@@ -1,8 +1,7 @@
-using System.Xml;
 using System.Xml.Serialization;
 using MicroBlog.Models;
 using MicroBlog.Models.Settings;
-using MicroBlog.Services;
+using MicroBlog.Services.Interfaces;
 using Microsoft.Extensions.Options;
 
 namespace MicroBlog.DataHandling;

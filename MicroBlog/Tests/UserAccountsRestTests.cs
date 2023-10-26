@@ -1,6 +1,6 @@
 using MicroBlog.Controllers;
 using MicroBlog.Models;
-using MicroBlog.Services;
+using MicroBlog.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit.Abstractions;

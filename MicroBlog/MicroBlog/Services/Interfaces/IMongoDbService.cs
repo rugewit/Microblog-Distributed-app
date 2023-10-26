@@ -1,6 +1,6 @@
 using MongoDB.Driver;
 
-namespace MicroBlog.Services;
+namespace MicroBlog.Services.Interfaces;
 
 public interface IMongoDbService
 {

@@ -1,5 +1,5 @@
-using MicroBlog.Models;
 using MicroBlog.Models.Settings;
+using MicroBlog.Services.Interfaces;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 

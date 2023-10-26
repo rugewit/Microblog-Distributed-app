@@ -1,6 +1,6 @@
-using MicroBlog.Models;
 using MicroBlog.Models.Settings;
 using MicroBlog.Services;
+using MicroBlog.Services.Interfaces;
 
 namespace MicroBlog.WebAppConfigs;
 
