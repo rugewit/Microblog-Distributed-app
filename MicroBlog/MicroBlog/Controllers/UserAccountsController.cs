@@ -83,9 +83,12 @@ public class UserAccountsController : ControllerBase
 
         updatedUserAccount.Id = userAccount.Id;
 
-        await _userAccountsService.UpdateAsync(id, updatedUserAccount);
-
-        return NoContent();
+        if (await _userAccountsService.UpdateAsync(id, updatedUserAccount))
+        {
+            return NoContent();
+        }
+        // it means that id is already locked
+        return Conflict();
     }
 
     [HttpDelete("{id:length(24)}")]

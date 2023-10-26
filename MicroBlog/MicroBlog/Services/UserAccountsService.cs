@@ -63,38 +63,30 @@ public class UserAccountsService : IUserAccountsService
     public async Task CreateManyAsync(IEnumerable<UserAccount> newUserAccounts) =>
         await _userAccountsCollection.InsertManyAsync(newUserAccounts);
 
-    public async Task UpdateAsync(string id, UserAccount updatedUserAccount)
+    public async Task<bool> UpdateAsync(string id, UserAccount updatedUserAccount)
     {
-        // lock user Account if it is in the redis cache
-        if (await _redisDb.KeyExistsAsync(id))
+        // redis doesn't want to lock by an userAcc id
+        // so it's a workaround: add "1" or any other symbol to an actual userAcc id
+        var lockId = id + "1";
+        var redactionSimulationTime = TimeSpan.FromSeconds(_redactionTimeSimulationSec);
+        
+        if (await _redisDb.LockTakeAsync(lockId, LockIdentifier,
+                // lock expiry must be greater then redactionSimulationTime
+                redactionSimulationTime * 2))
         {
-            // redis doesn't want to lock by an userAcc id
-            // so it's a workaround: add "1" or any other symbol to an actual userAcc id
-            var lockId = id + "1";
-            var redactionSimulationTime = TimeSpan.FromSeconds(_redactionTimeSimulationSec);
-            
-            if (await _redisDb.LockTakeAsync(lockId, LockIdentifier,
-                    redactionSimulationTime * 2))
-            {
-                await Task.Delay(redactionSimulationTime);
-                await _userAccountsCollection.ReplaceOneAsync(x => x.Id == id, updatedUserAccount);
-                await _redisDb.KeyDeleteAsync(id);
-                if (!await _redisDb.LockReleaseAsync(lockId, LockIdentifier))
-                {
-                    Console.WriteLine($"Cannot unlock the lock,\nUserAccount={id},\nLockId={lockId}");
-                }
-                Console.WriteLine($"LockId={lockId} has been unlocked");
-            }
-            else
-            {
-                Console.WriteLine($"Cannot lock\nUserAccount={id},\nLockId={lockId}");
-            }
-        }
-        else
-        { 
-            // replace in the mongo db
+            await Task.Delay(redactionSimulationTime);
             await _userAccountsCollection.ReplaceOneAsync(x => x.Id == id, updatedUserAccount);
+            await _redisDb.KeyDeleteAsync(id);
+            if (!await _redisDb.LockReleaseAsync(lockId, LockIdentifier))
+            {
+                Console.WriteLine($"Cannot unlock the lock,\nUserAccount={id},\nLockId={lockId}");
+            }
+            Console.WriteLine($"LockId={lockId} has been unlocked");
+            return true;
         }
+
+        Console.WriteLine($"Cannot lock\nUserAccount={id},\nLockId={lockId}");
+        return false;
     }
 
     public async Task RemoveAsync(string id)
@@ -104,6 +96,5 @@ public class UserAccountsService : IUserAccountsService
             await _redisDb.StringGetDeleteAsync(id);
         }
         await _userAccountsCollection.DeleteOneAsync(x => x.Id == id);
-        
     }
 }

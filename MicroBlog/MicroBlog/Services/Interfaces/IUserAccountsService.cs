@@ -16,7 +16,7 @@ public interface IUserAccountsService
 
     public Task CreateManyAsync(IEnumerable<UserAccount> newUserAccounts);
 
-    public Task UpdateAsync(string id, UserAccount updatedUserAccount);
+    public Task<bool> UpdateAsync(string id, UserAccount updatedUserAccount);
 
     public Task RemoveAsync(string id);
 }
