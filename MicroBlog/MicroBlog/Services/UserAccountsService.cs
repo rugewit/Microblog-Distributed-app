@@ -1,6 +1,7 @@
 using System.Text.Json;
 using MicroBlog.Models;
 using MicroBlog.Models.Settings;
+using MicroBlog.Providers.Interfaces;
 using MicroBlog.Services.Interfaces;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -17,14 +18,18 @@ public class UserAccountsService : IUserAccountsService
     private readonly int _redactionTimeSimulationSec;
     // some random identifier for the redis lock
     private const string LockIdentifier = "hfgf234832645tfedf";
+    private readonly ILogger<UserAccountsService> _logger;
     
-    public UserAccountsService(IMongoDbService mongoDbService, 
-        IOptions<MicroBlogDatabaseSettings> databaseSettings, IRedisService redisService,
-        IOptions<UserAccountsExpirePolicySettings> userAccExpireSettings)
+    public UserAccountsService(IMongoDbProvider mongoDbProvider,
+        IOptions<MicroBlogDatabaseSettings> databaseSettings, IRedisProvider redisProvider,
+        IOptions<UserAccountsExpirePolicySettings> userAccExpireSettings,
+        ILogger<UserAccountsService> logger)
     {
         var collectionName = databaseSettings.Value.UserAccountsCollectionName;
-        _userAccountsCollection = mongoDbService.MongoDatabase.GetCollection<UserAccount>(collectionName);
-        _redisDb = redisService.GetRedisDb();
+        _userAccountsCollection = mongoDbProvider.MongoDatabase.GetCollection<UserAccount>(collectionName);
+        _redisDb = redisProvider.GetRedisDb();
+        _logger = logger;
+
         _userAccExpireTimeSec = userAccExpireSettings.Value.UserAccountCacheExpireTimeSec;
         _redactionTimeSimulationSec = userAccExpireSettings.Value.RedactionTimeSimulationSec;
     }
@@ -42,7 +47,8 @@ public class UserAccountsService : IUserAccountsService
         {
             var userAccountRedisValue = await _redisDb.StringGetAsync(id);
             userAccount = JsonSerializer.Deserialize<UserAccount>(userAccountRedisValue.ToString());
-            Console.WriteLine("got from redis");
+            //Console.WriteLine("got from redis");
+            _logger.LogInformation($"{id} got from redis");
         }
         else
         {
@@ -52,7 +58,8 @@ public class UserAccountsService : IUserAccountsService
                 var userAccountString = JsonSerializer.Serialize(userAccount);
                 await _redisDb.StringSetAsync(id, userAccountString, 
                     TimeSpan.FromSeconds(_userAccExpireTimeSec));
-                Console.WriteLine("got from db");
+                //Console.WriteLine("got from db");
+                _logger.LogInformation($"{id} got from db");
             }
         }
         return userAccount;
@@ -66,8 +73,7 @@ public class UserAccountsService : IUserAccountsService
 
     public async Task<bool> UpdateAsync(string id, UserAccount updatedUserAccount)
     {
-        // redis doesn't want to lock by an userAcc id
-        // so it's a workaround: add "1" or any other symbol to an actual userAcc id
+        // redis saves lock, account is already saved in redis, so weed to generate a new id
         var lockId = id + "1";
         var redactionSimulationTime = TimeSpan.FromSeconds(_redactionTimeSimulationSec);
         
@@ -80,13 +86,12 @@ public class UserAccountsService : IUserAccountsService
             await _redisDb.KeyDeleteAsync(id);
             if (!await _redisDb.LockReleaseAsync(lockId, LockIdentifier))
             {
-                Console.WriteLine($"Cannot unlock the lock,\nUserAccount={id},\nLockId={lockId}");
+                _logger.LogCritical($"Cannot unlock the lock,\nUserAccount={id},\nLockId={lockId}");
             }
-            Console.WriteLine($"LockId={lockId} has been unlocked");
+            _logger.LogInformation($"LockId={lockId} has been unlocked");
             return true;
         }
-
-        Console.WriteLine($"Cannot lock\nUserAccount={id},\nLockId={lockId}");
+        _logger.LogInformation($"Cannot lock\nUserAccount={id},\nLockId={lockId}");
         return false;
     }
 

@@ -47,3 +47,5 @@
 /home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/MicroBlog/bin/Debug/net7.0/NRedisStack.dll
 /home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/MicroBlog/bin/Debug/net7.0/Pipelines.Sockets.Unofficial.dll
 /home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/MicroBlog/bin/Debug/net7.0/StackExchange.Redis.dll
+/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/MicroBlog/bin/Debug/net7.0/Elasticsearch.Net.dll
+/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/MicroBlog/bin/Debug/net7.0/Nest.dll

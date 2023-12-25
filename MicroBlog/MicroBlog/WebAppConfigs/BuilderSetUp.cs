@@ -1,4 +1,6 @@
 using MicroBlog.Models.Settings;
+using MicroBlog.Providers;
+using MicroBlog.Providers.Interfaces;
 using MicroBlog.Services;
 using MicroBlog.Services.Interfaces;
 
@@ -20,10 +22,15 @@ public static class BuilderSetUp
         // expire policy
         builder.Services.Configure<UserAccountsExpirePolicySettings>(
             builder.Configuration.GetSection("UserAccountsExpirePolicy"));
-
-        builder.Services.AddSingleton<IMongoDbService, MongoDbService>();
+        // elastic search configuration
+        builder.Services.Configure<ElasticSearchSettings>(
+            builder.Configuration.GetSection("ElasticSearch"));
+        
+        builder.Services.AddSingleton<IMongoDbProvider, MongoDbProvider>();
         builder.Services.AddSingleton<IUserAccountsService, UserAccountsService>();
         builder.Services.AddSingleton<IMessagesService, MessagesService>();
-        builder.Services.AddSingleton<IRedisService>(new RedisService("localhost,allowAdmin=true"));
+        builder.Services.AddSingleton<IRedisProvider>(new RedisProvider("localhost,allowAdmin=true"));
+        builder.Services.AddSingleton<IElasticSearchProvider, ElasticSearchProvider>();
+        builder.Services.AddSingleton<IElasticSearchService, ElasticSearchService>();
     }
 }

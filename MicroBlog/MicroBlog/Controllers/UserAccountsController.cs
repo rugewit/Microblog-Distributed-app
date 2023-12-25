@@ -38,7 +38,6 @@ public class UserAccountsController : ControllerBase
         {
             return NotFound();
         }
-
         return userAccount;
     }
 
@@ -87,7 +86,8 @@ public class UserAccountsController : ControllerBase
             return NoContent();
         }
         // it means that id is already locked
-        return Conflict();
+        const int lockStatusCode = 423;
+        return StatusCode(lockStatusCode);
     }
 
     [HttpDelete("{id:length(24)}")]

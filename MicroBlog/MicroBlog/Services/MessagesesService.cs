@@ -1,5 +1,7 @@
 using MicroBlog.Models;
 using MicroBlog.Models.Settings;
+using MicroBlog.Providers;
+using MicroBlog.Providers.Interfaces;
 using MicroBlog.Services.Interfaces;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -11,11 +13,11 @@ public class MessagesService : IMessagesService
     public int GetAllDocsLimit { get; set; } = 200;
     private readonly IMongoCollection<Message> _messagesCollection;
     
-    public MessagesService(IMongoDbService mongoDbService, 
+    public MessagesService(IMongoDbProvider mongoDbProvider, 
         IOptions<MicroBlogDatabaseSettings> databaseSettings)
     {
         var collectionName = databaseSettings.Value.MessagesCollectionName;
-        _messagesCollection = mongoDbService.MongoDatabase.GetCollection<Message>(collectionName);
+        _messagesCollection = mongoDbProvider.MongoDatabase.GetCollection<Message>(collectionName);
     }
     
     public async Task<List<Message>> GetAsync() =>

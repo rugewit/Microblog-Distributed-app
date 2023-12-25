@@ -19,13 +19,13 @@ public class UserAccount
    public int Reputation { get; set; }
    
    [XmlAttribute("CreationDate")]
-   public string CreationDate { get; set; } = null!;
+   public DateTime CreationDate { get; set; }
    
    [XmlAttribute("DisplayName")]
    public string DisplayName { get; set; } = null!;
    
    [XmlAttribute("LastAccessDate")]
-   public string LastAccessDate { get; set; } = null!;
+   public DateTime LastAccessDate { get; set; }
    
    [XmlAttribute("WebsiteUrl")]
    public string WebsiteUrl { get; set; } = null!;

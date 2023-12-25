@@ -21,7 +21,7 @@ public class Message
     public int AcceptedAnswerId { get; set; }
     
     [XmlAttribute("CreationDate")]
-    public string CreationDate { get; set; } = null!;
+    public DateTime CreationDate { get; set; }
     
     [XmlAttribute("Score")]
     public int Score { get; set; }
@@ -39,10 +39,10 @@ public class Message
     public int LastEditorUserId { get; set; }
     
     [XmlAttribute("LastEditDate")]
-    public string LastEditDate { get; set; } = null!;
+    public DateTime LastEditDate { get; set; }
     
     [XmlAttribute("LastActivityDate")]
-    public string LastActivityDate { get; set; } = null!;
+    public DateTime LastActivityDate { get; set; }
     
     [XmlAttribute("Title")]
     public string Title { get; set; } = null!;

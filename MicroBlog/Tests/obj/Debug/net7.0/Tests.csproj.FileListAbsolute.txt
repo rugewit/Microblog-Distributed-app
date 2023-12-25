@@ -125,3 +125,5 @@
 /home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Tests/obj/Debug/net7.0/Tests.pdb
 /home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Tests/obj/Debug/net7.0/Tests.genruntimeconfig.cache
 /home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Tests/obj/Debug/net7.0/ref/Tests.dll
+/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Tests/bin/Debug/net7.0/Elasticsearch.Net.dll
+/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Tests/bin/Debug/net7.0/Nest.dll

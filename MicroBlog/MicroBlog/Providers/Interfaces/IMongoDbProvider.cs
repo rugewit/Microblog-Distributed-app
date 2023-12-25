@@ -1,8 +1,8 @@
 using MongoDB.Driver;
 
-namespace MicroBlog.Services.Interfaces;
+namespace MicroBlog.Providers.Interfaces;
 
-public interface IMongoDbService
+public interface IMongoDbProvider
 {
     public IMongoDatabase MongoDatabase { get; }
 }

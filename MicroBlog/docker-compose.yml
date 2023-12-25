@@ -1,0 +1,143 @@
+x-api-config: &api-config
+  build: .
+  env_file:
+    - MicroBlog/env/docker.env
+  depends_on:
+    mongo_cluster_init:
+      condition: service_completed_successfully
+    elasticsearch_node_01:
+      condition: service_healthy
+    elasticsearch_node_02:
+      condition: service_healthy
+    elasticsearch_node_03:
+      condition: service_healthy
+    redis_node_01:
+      condition: service_healthy
+    redis_node_02:
+      condition: service_healthy
+    redis_node_03:
+      condition: service_healthy
+
+x-mongodb-healthcheck: &mongodb-healthcheck
+  healthcheck:
+    test: echo 'db.runCommand("ping").ok' | mongosh 127.0.0.1:27017/test --quiet
+    interval: 10s
+    timeout: 10s
+    retries: 5
+    start_period: 40s
+
+x-elasticsearch-healthcheck: &elasticsearch-healthcheck
+  healthcheck:
+    interval: 5s
+    retries: 80
+    test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://127.0.0.1:9200
+
+x-memcached-healthcheck: &memcached-healthcheck
+  healthcheck:
+    test: echo stats | nc 127.0.0.1 11211
+    interval: 10s
+    retries: 60
+
+x-redis-healthcheck: &redis-healthcheck
+  healthcheck:
+    test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+
+
+services:
+  api_node_01:
+    <<: [ *api-config]
+
+  api_node_02:
+    <<: [ *api-config ]
+
+  api_node_03:
+    <<: [ *api-config ]
+
+  mongo_db_node_01:
+    image: mongo:7.0.2
+    <<: [ *mongodb-healthcheck ]
+    #volumes:
+    #  - ./data/mongo_node_01:/data/db
+    command: mongod --replSet docker-replicaset
+
+  mongo_db_node_02:
+    image: mongo:7.0.2
+    <<: [ *mongodb-healthcheck ]
+    #volumes:
+    #  - ./data/mongo_node_02:/data/db
+    command: mongod --replSet docker-replicaset
+
+  mongo_db_node_03:
+    image: mongo:7.0.2
+    <<: [ *mongodb-healthcheck ]
+    #volumes:
+    #  - ./data/mongo_node_03:/data/db
+    command: mongod --replSet docker-replicaset
+
+  mongo_cluster_init:
+    image: mongo:7.0.2
+    depends_on:
+      mongo_db_node_01:
+        condition: service_healthy
+      mongo_db_node_02:
+        condition: service_healthy
+      mongo_db_node_03:
+        condition: service_healthy
+    volumes:
+      - ./MicroBlog/env/init-mongo.js:/scripts/init-mongo.js:ro
+    entrypoint: [ "mongosh", "--host", "mongo_db_node_01", "--file", "/scripts/init-mongo.js"]
+
+  elasticsearch_node_01:
+    image: elasticsearch:8.10.2
+    <<: [ *elasticsearch-healthcheck ]
+    environment:
+      - node.name=elasticsearch_node_01
+      - discovery.seed_hosts=elasticsearch_node_02,elasticsearch_node_03
+    env_file:
+      - MicroBlog/env/elasticsearch.env
+    #volumes:
+    #  - ./data/elasticsearch_node_01:/usr/share/elasticsearch/data
+
+  elasticsearch_node_02:
+    image: elasticsearch:8.10.2
+    <<: [ *elasticsearch-healthcheck ]
+    environment:
+      - node.name=elasticsearch_node_02
+      - discovery.seed_hosts=elasticsearch_node_01,elasticsearch_node_03
+    env_file:
+      - MicroBlog/env/elasticsearch.env
+    #volumes:
+    #  - ./data/elasticsearch_node_02:/usr/share/elasticsearch/data
+
+  elasticsearch_node_03:
+    image: elasticsearch:8.10.2
+    <<: [ *elasticsearch-healthcheck ]
+    environment:
+      - node.name=elasticsearch_node_03
+      - discovery.seed_hosts=elasticsearch_node_01,elasticsearch_node_02
+    env_file:
+      - MicroBlog/env/elasticsearch.env
+    #volumes:
+    #  - ./data/elasticsearch_node_03:/usr/share/elasticsearch/data
+  
+  redis_node_01:
+    image: redis:alpine
+    <<: [ *redis-healthcheck ]
+  
+  redis_node_02:
+    image: redis:alpine
+    <<: [ *redis-healthcheck ]
+  
+  redis_node_03:
+    image: redis:alpine
+    <<: [ *redis-healthcheck ]
+  nginx:
+    image: nginx
+    ports:
+      - 80:80
+    depends_on:
+      - api_node_01
+      - api_node_02
+      - api_node_03
+    volumes:
+      - ./MicroBlog/env/nginx.conf:/etc/nginx/nginx.conf:ro
