@@ -10,10 +10,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("ea02da86-89fe-4b57-a362-6f21024e66a0")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("MicroBlog")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6f4f2310d90447fe1a959ed8d5fece41fc1d95a4")]
 [assembly: System.Reflection.AssemblyProductAttribute("MicroBlog")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MicroBlog")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

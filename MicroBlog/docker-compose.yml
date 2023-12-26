@@ -11,11 +11,11 @@ x-api-config: &api-config
       condition: service_healthy
     elasticsearch_node_03:
       condition: service_healthy
-    redis_node_01:
+    memcached_node_01:
       condition: service_healthy
-    redis_node_02:
+    memcached_node_02:
       condition: service_healthy
-    redis_node_03:
+    memcached_node_03:
       condition: service_healthy
 
 x-mongodb-healthcheck: &mongodb-healthcheck
@@ -120,17 +120,23 @@ services:
     #volumes:
     #  - ./data/elasticsearch_node_03:/usr/share/elasticsearch/data
   
-  redis_node_01:
+  redis:
     image: redis:alpine
-    <<: [ *redis-healthcheck ]
+    ports:
+      - '6379:6379'
   
-  redis_node_02:
-    image: redis:alpine
-    <<: [ *redis-healthcheck ]
-  
-  redis_node_03:
-    image: redis:alpine
-    <<: [ *redis-healthcheck ]
+  memcached_node_01:
+    image: memcached:alpine
+    <<: [ *memcached-healthcheck ]
+
+  memcached_node_02:
+    image: memcached:alpine
+    <<: [ *memcached-healthcheck ]
+
+  memcached_node_03:
+    image: memcached:alpine
+    <<: [ *memcached-healthcheck ]
+    
   nginx:
     image: nginx
     ports:

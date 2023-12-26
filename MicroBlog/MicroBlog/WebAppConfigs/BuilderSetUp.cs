@@ -1,3 +1,4 @@
+using Enyim.Caching.Configuration;
 using MicroBlog.Models.Settings;
 using MicroBlog.Providers;
 using MicroBlog.Providers.Interfaces;
@@ -29,8 +30,11 @@ public static class BuilderSetUp
         builder.Services.AddSingleton<IMongoDbProvider, MongoDbProvider>();
         builder.Services.AddSingleton<IUserAccountsService, UserAccountsService>();
         builder.Services.AddSingleton<IMessagesService, MessagesService>();
-        builder.Services.AddSingleton<IRedisProvider>(new RedisProvider("localhost,allowAdmin=true"));
+        builder.Services.AddSingleton<IRedisProvider>(new RedisProvider("redis:6379,allowAdmin=true"));
         builder.Services.AddSingleton<IElasticSearchProvider, ElasticSearchProvider>();
         builder.Services.AddSingleton<IElasticSearchService, ElasticSearchService>();
+        builder.Services.AddEnyimMemcached(o => o.Servers = new List<Server> { new Server 
+            { Address = "localhost", Port = 11211 } });
+        builder.Services.AddSingleton<IMemCacheProvider, MemCacheProvider>();
     }
 }

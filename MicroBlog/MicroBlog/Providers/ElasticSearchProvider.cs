@@ -5,6 +5,7 @@ using Elasticsearch.Net;
 using MicroBlog.Models.Settings;
 using MicroBlog.Providers.Interfaces;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using Nest;
 
 namespace MicroBlog.Providers;

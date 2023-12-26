@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Enyim.Caching;
 using MicroBlog.Models;
 using MicroBlog.Models.Settings;
 using MicroBlog.Providers.Interfaces;
@@ -19,11 +20,12 @@ public class UserAccountsService : IUserAccountsService
     // some random identifier for the redis lock
     private const string LockIdentifier = "hfgf234832645tfedf";
     private readonly ILogger<UserAccountsService> _logger;
+    private readonly IMemcachedClient _memCache;
     
     public UserAccountsService(IMongoDbProvider mongoDbProvider,
         IOptions<MicroBlogDatabaseSettings> databaseSettings, IRedisProvider redisProvider,
         IOptions<UserAccountsExpirePolicySettings> userAccExpireSettings,
-        ILogger<UserAccountsService> logger)
+        ILogger<UserAccountsService> logger, IMemCacheProvider memCacheProvider)
     {
         var collectionName = databaseSettings.Value.UserAccountsCollectionName;
         _userAccountsCollection = mongoDbProvider.MongoDatabase.GetCollection<UserAccount>(collectionName);
@@ -32,6 +34,7 @@ public class UserAccountsService : IUserAccountsService
 
         _userAccExpireTimeSec = userAccExpireSettings.Value.UserAccountCacheExpireTimeSec;
         _redactionTimeSimulationSec = userAccExpireSettings.Value.RedactionTimeSimulationSec;
+        _memCache = memCacheProvider.MemcachedClient;
     }
     
     public async Task<List<UserAccount>> GetAsync() =>
@@ -43,10 +46,15 @@ public class UserAccountsService : IUserAccountsService
     public async Task<UserAccount?> GetAsync(string id)
     {
         UserAccount? userAccount;
-        if (await _redisDb.KeyExistsAsync(id))
+        // REPLACE REDIS TO MEMCACHED
+        // await _redisDb.KeyExistsAsync(id)
+        var memCachedRes = await _memCache.GetAsync<string>(id);
+        if (memCachedRes.Success)
         {
-            var userAccountRedisValue = await _redisDb.StringGetAsync(id);
-            userAccount = JsonSerializer.Deserialize<UserAccount>(userAccountRedisValue.ToString());
+            // REPLACE REDIS TO MEMCACHED
+            //var userAccountRedisValue = await _redisDb.StringGetAsync(id);
+            //var userAccountMemCachedValue = await _memCache.GetAsync<string>(id);
+            userAccount = JsonSerializer.Deserialize<UserAccount>(memCachedRes.Value);
             //Console.WriteLine("got from redis");
             _logger.LogInformation($"{id} got from redis");
         }
@@ -56,8 +64,9 @@ public class UserAccountsService : IUserAccountsService
             if (userAccount != null)
             {
                 var userAccountString = JsonSerializer.Serialize(userAccount);
-                await _redisDb.StringSetAsync(id, userAccountString, 
-                    TimeSpan.FromSeconds(_userAccExpireTimeSec));
+                // REPLACE REDIS TO MEMCACHED
+                //await _redisDb.StringSetAsync(id, userAccountString, TimeSpan.FromSeconds(_userAccExpireTimeSec));
+                await _memCache.AddAsync(id, userAccountString, TimeSpan.FromSeconds(_userAccExpireTimeSec));
                 //Console.WriteLine("got from db");
                 _logger.LogInformation($"{id} got from db");
             }
@@ -73,7 +82,6 @@ public class UserAccountsService : IUserAccountsService
 
     public async Task<bool> UpdateAsync(string id, UserAccount updatedUserAccount)
     {
-        // redis saves lock, account is already saved in redis, so weed to generate a new id
         var lockId = id + "1";
         var redactionSimulationTime = TimeSpan.FromSeconds(_redactionTimeSimulationSec);
         
@@ -83,7 +91,9 @@ public class UserAccountsService : IUserAccountsService
         {
             await Task.Delay(redactionSimulationTime);
             await _userAccountsCollection.ReplaceOneAsync(x => x.Id == id, updatedUserAccount);
-            await _redisDb.KeyDeleteAsync(id);
+            // REPLACE REDIS TO MEMCACHED
+            //await _redisDb.KeyDeleteAsync(id);
+            await _memCache.RemoveAsync(id);
             if (!await _redisDb.LockReleaseAsync(lockId, LockIdentifier))
             {
                 _logger.LogCritical($"Cannot unlock the lock,\nUserAccount={id},\nLockId={lockId}");
@@ -97,9 +107,17 @@ public class UserAccountsService : IUserAccountsService
 
     public async Task RemoveAsync(string id)
     {
+        // REPLACE REDIS TO MEMCACHED
+        /*
         if (await _redisDb.KeyExistsAsync(id))
         {
             await _redisDb.StringGetDeleteAsync(id);
+        }
+        */
+        var res = await _memCache.GetAsync<string>(id);
+        if (res.Success)
+        {
+            await _memCache.RemoveAsync(id);
         }
         await _userAccountsCollection.DeleteOneAsync(x => x.Id == id);
     }

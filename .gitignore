@@ -2,3 +2,6 @@
 /MicroBlog/MicroBlog/bin/
 /MicroBlog/MicroBlog/obj/
 /MicroBlog/Tests/bin/
+/MicroBlog/Tests/obj/
+/MicroBlog/MicroBlog/.idea/
+.vs
