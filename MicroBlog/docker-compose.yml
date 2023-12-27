@@ -56,22 +56,22 @@ services:
   mongo_db_node_01:
     image: mongo:7.0.2
     <<: [ *mongodb-healthcheck ]
-    #volumes:
-    #  - ./data/mongo_node_01:/data/db
+    volumes:
+      - ./data/mongo_node_01:/data/db
     command: mongod --replSet docker-replicaset
 
   mongo_db_node_02:
     image: mongo:7.0.2
     <<: [ *mongodb-healthcheck ]
-    #volumes:
-    #  - ./data/mongo_node_02:/data/db
+    volumes:
+      - ./data/mongo_node_02:/data/db
     command: mongod --replSet docker-replicaset
 
   mongo_db_node_03:
     image: mongo:7.0.2
     <<: [ *mongodb-healthcheck ]
-    #volumes:
-    #  - ./data/mongo_node_03:/data/db
+    volumes:
+      - ./data/mongo_node_03:/data/db
     command: mongod --replSet docker-replicaset
 
   mongo_cluster_init:
@@ -95,8 +95,8 @@ services:
       - discovery.seed_hosts=elasticsearch_node_02,elasticsearch_node_03
     env_file:
       - MicroBlog/env/elasticsearch.env
-    #volumes:
-    #  - ./data/elasticsearch_node_01:/usr/share/elasticsearch/data
+    volumes:
+      - ./data/elasticsearch_node_01:/usr/share/elasticsearch/data
 
   elasticsearch_node_02:
     image: elasticsearch:8.10.2
@@ -106,8 +106,8 @@ services:
       - discovery.seed_hosts=elasticsearch_node_01,elasticsearch_node_03
     env_file:
       - MicroBlog/env/elasticsearch.env
-    #volumes:
-    #  - ./data/elasticsearch_node_02:/usr/share/elasticsearch/data
+    volumes:
+      - ./data/elasticsearch_node_02:/usr/share/elasticsearch/data
 
   elasticsearch_node_03:
     image: elasticsearch:8.10.2
@@ -117,8 +117,8 @@ services:
       - discovery.seed_hosts=elasticsearch_node_01,elasticsearch_node_02
     env_file:
       - MicroBlog/env/elasticsearch.env
-    #volumes:
-    #  - ./data/elasticsearch_node_03:/usr/share/elasticsearch/data
+    volumes:
+      - ./data/elasticsearch_node_03:/usr/share/elasticsearch/data
   
   redis:
     image: redis:alpine
@@ -146,4 +146,5 @@ services:
       - api_node_02
       - api_node_03
     volumes:
+      - ./data/nginx/cache:/data/nginx/cache
       - ./MicroBlog/env/nginx.conf:/etc/nginx/nginx.conf:ro

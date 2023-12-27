@@ -1,5 +1,5 @@
 instance = new Mongo("mongo_db_node_01:27017");
-db = instance.getDB("api-db");
+db = instance.getDB("MicroBlog");
 
 config = {
     "_id": "docker-replicaset",

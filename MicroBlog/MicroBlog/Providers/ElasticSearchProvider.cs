@@ -20,8 +20,8 @@ public class ElasticSearchProvider: IElasticSearchProvider
         //var auth = new BasicAu(elasticSearchSettings.Value.Username,
         //    elasticSearchSettings.Value.Password);
         var settings = new ConnectionSettings(address)
-            .CertificateFingerprint(elasticSearchSettings.Value.CertificateFingerprint)
-            .BasicAuthentication(elasticSearchSettings.Value.Username, elasticSearchSettings.Value.Password)
+            //.CertificateFingerprint(elasticSearchSettings.Value.CertificateFingerprint)
+            //.BasicAuthentication(elasticSearchSettings.Value.Username, elasticSearchSettings.Value.Password)
             .DefaultIndex(elasticSearchSettings.Value.IndexName);
         ElasticsearchClient = new ElasticClient(settings);
     }

@@ -20,7 +20,8 @@ WORKDIR /app
 COPY --from=build /app/out ./
 
 # Expose the port that the application will run on
-EXPOSE 80
+EXPOSE 5002
+#ENV ASPNETCORE_URLS http://+:5002
 
 # Set the entry point for the application
 ENTRYPOINT ["dotnet", "MicroBlog.dll"]

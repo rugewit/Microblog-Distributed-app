@@ -11,6 +11,7 @@ class Program
 {
     static void Main(string[] args)
     {
+        //Console.WriteLine("Hey, I am running");
         var builder = WebApplication.CreateBuilder(args);
 
         BuilderSetUp.SetUp(builder);
