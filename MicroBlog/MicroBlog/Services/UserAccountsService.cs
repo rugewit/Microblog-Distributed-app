@@ -12,7 +12,6 @@ namespace MicroBlog.Services;
 
 public class UserAccountsService : IUserAccountsService
 {
-    public int GetAllDocsLimit { get; set; } = 200;
     private readonly IMongoCollection<UserAccount> _userAccountsCollection;
     private readonly IDatabase _redisDb;
     private readonly int _userAccExpireTimeSec;
@@ -37,12 +36,15 @@ public class UserAccountsService : IUserAccountsService
         _memCache = memCacheProvider.MemcachedClient;
     }
     
-    public async Task<List<UserAccount>> GetAsync() =>
-        await _userAccountsCollection.Find(_ => true).Limit(GetAllDocsLimit).ToListAsync();
-    
-    public async Task<List<UserAccount>> GetLimitedAsync(int limit) =>
+    public async Task<IEnumerable<UserAccount>> GetLimitedAsync(int limit = 200) =>
         await _userAccountsCollection.Find(_ => true).Limit(limit).ToListAsync();
 
+    public async Task<IEnumerable<UserAccount>> GetAllAsync() => 
+        await _userAccountsCollection.Find(_ => true).ToListAsync();
+    
+    public async Task<long> GetTotalCount() => 
+        await _userAccountsCollection.CountDocumentsAsync(_ => true);
+    
     public async Task<UserAccount?> GetAsync(string id)
     {
         UserAccount? userAccount;

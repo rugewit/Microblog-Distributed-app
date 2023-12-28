@@ -4,14 +4,14 @@ namespace MicroBlog.Services.Interfaces;
 
 public interface IUserAccountsService
 {
-    public int GetAllDocsLimit { get; set; }
+    public Task<IEnumerable<UserAccount>> GetAllAsync();
     
-    public Task<List<UserAccount>> GetAsync();
-
-    public Task<List<UserAccount>> GetLimitedAsync(int limit);
+    public Task<IEnumerable<UserAccount>> GetLimitedAsync(int limit = 200);
 
     public Task<UserAccount?> GetAsync(string id);
-
+    
+    public Task<long> GetTotalCount();
+    
     public Task CreateAsync(UserAccount newUserAccount);
 
     public Task CreateManyAsync(IEnumerable<UserAccount> newUserAccounts);

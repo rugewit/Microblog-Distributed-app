@@ -10,7 +10,6 @@ namespace MicroBlog.Services;
 
 public class MessagesService : IMessagesService
 {
-    public int GetAllDocsLimit { get; set; } = 200;
     private readonly IMongoCollection<Message> _messagesCollection;
     
     public MessagesService(IMongoDbProvider mongoDbProvider, 
@@ -19,12 +18,18 @@ public class MessagesService : IMessagesService
         var collectionName = databaseSettings.Value.MessagesCollectionName;
         _messagesCollection = mongoDbProvider.MongoDatabase.GetCollection<Message>(collectionName);
     }
+
+    public async Task<IEnumerable<Message>> GetAllAsync() =>
+        await _messagesCollection.Find(_ => true).ToListAsync();
     
-    public async Task<List<Message>> GetAsync() =>
-        await _messagesCollection.Find(_ => true).Limit(GetAllDocsLimit).ToListAsync();
-    
-    public async Task<List<Message>> GetLimitedAsync(int limit) =>
+    public async Task<IEnumerable<Message>> GetLimitedAsync(int limit = 200) =>
         await _messagesCollection.Find(_ => true).Limit(limit).ToListAsync();
+
+    public async Task<long> GetTotalCount()
+    {
+        var count = await _messagesCollection.CountDocumentsAsync(_ => true);
+        return count;
+    }
 
     public async Task<Message?> GetAsync(string id) =>
         await _messagesCollection.Find(x => x.Id == id).FirstOrDefaultAsync();

@@ -17,11 +17,11 @@ public class UserAccountsController : ControllerBase
     }
     
     [HttpGet]
-    public async Task<List<UserAccount>> Get() =>
-        await _userAccountsService.GetAsync();
+    public async Task<IEnumerable<UserAccount>> Get() =>
+        await _userAccountsService.GetLimitedAsync();
     
     [HttpGet("{limit:int}")]
-    public async Task<List<UserAccount>> Get(int limit) =>
+    public async Task<IEnumerable<UserAccount>> Get(int limit) =>
         await _userAccountsService.GetLimitedAsync(limit);
 
     [HttpGet("{id:length(24)}")]
@@ -39,6 +39,13 @@ public class UserAccountsController : ControllerBase
             return NotFound();
         }
         return userAccount;
+    }
+
+    [HttpGet("total-count")]
+    public async Task<long> GetTotalCount()
+    {
+        var count = await _userAccountsService.GetTotalCount();
+        return count;
     }
 
     [HttpPost]
@@ -59,10 +66,7 @@ public class UserAccountsController : ControllerBase
 
         await _userAccountsService.CreateManyAsync(newUserAccounts);
 
-        return CreatedAtAction(nameof(Get), new
-        {
-            ids = newUserAccounts.Select(userAccount => userAccount.Id)
-        }, newUserAccounts);
+        return CreatedAtAction(nameof(Get), $"inserted: {newUserAccounts.Count} users");
     }
     
     [HttpPut("{id:length(24)}")]
@@ -108,5 +112,4 @@ public class UserAccountsController : ControllerBase
 
         return NoContent();
     }
-    
 }

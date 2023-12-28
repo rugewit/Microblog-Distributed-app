@@ -4,11 +4,11 @@ namespace MicroBlog.Services.Interfaces;
 
 public interface IMessagesService
 {
-    public int GetAllDocsLimit { get; set; }
-    
-    public Task<List<Message>> GetAsync();
+    public Task<IEnumerable<Message>> GetAllAsync();
 
-    public Task<List<Message>> GetLimitedAsync(int limit);
+    public Task<IEnumerable<Message>> GetLimitedAsync(int limit = 200);
+
+    public Task<long> GetTotalCount();
 
     public Task<Message?> GetAsync(string id);
 

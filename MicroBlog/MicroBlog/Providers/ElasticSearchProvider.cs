@@ -16,10 +16,18 @@ public class ElasticSearchProvider: IElasticSearchProvider
 
     public ElasticSearchProvider(IOptions<ElasticSearchSettings> elasticSearchSettings)
     {
-        var address = new Uri(elasticSearchSettings.Value.ConnectionString);
-        //var auth = new BasicAu(elasticSearchSettings.Value.Username,
-        //    elasticSearchSettings.Value.Password);
-        var settings = new ConnectionSettings(address)
+        //var address = new Uri(elasticSearchSettings.Value.ConnectionString);
+        // http://elasticsearch_node_01:9200,http://elasticsearch_node_02:9200,http://elasticsearch_node_03:9200
+        var nodes = new[]
+        {
+            new Uri("http://elasticsearch_node_01:9200"),
+            new Uri("http://elasticsearch_node_02:9200"),
+            new Uri("http://elasticsearch_node_03:9200"),
+        };
+
+        var connectionPool = new SniffingConnectionPool(nodes);
+        
+        var settings = new ConnectionSettings(connectionPool)
             //.CertificateFingerprint(elasticSearchSettings.Value.CertificateFingerprint)
             //.BasicAuthentication(elasticSearchSettings.Value.Username, elasticSearchSettings.Value.Password)
             .DefaultIndex(elasticSearchSettings.Value.IndexName);

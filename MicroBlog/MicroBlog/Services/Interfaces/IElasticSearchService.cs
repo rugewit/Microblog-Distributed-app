@@ -22,5 +22,8 @@ public interface IElasticSearchService
     
     public Task<IEnumerable<MessageElastic>> GetAllAsync();
 
+    public Task<IEnumerable<MessageElastic>> GetLimitedAsync(int limit=200);
+
+    public Task<int> GetTotalCountAsync();
     public string GetRootNodeInfo();
 }

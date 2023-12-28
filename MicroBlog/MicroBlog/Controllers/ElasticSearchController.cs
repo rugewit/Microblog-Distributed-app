@@ -19,6 +19,14 @@ public class ElasticSearchController : ControllerBase
     public async Task<IEnumerable<MessageElastic>> Get() =>
         await _elasticSearchService.GetAllAsync();
     
+    [HttpGet("total-count")]
+    public async Task<int> GetTotalCount()
+    {
+        var count = await _elasticSearchService.GetTotalCountAsync();
+        
+        return count;
+    }
+    
     [HttpGet("{query}")]
     public async Task<IEnumerable<MessageElastic>> FindMessagesByQuery(string query) =>
         await _elasticSearchService.FindMessagesByQueryAsync(query);
@@ -29,14 +37,14 @@ public class ElasticSearchController : ControllerBase
     {
         return await _elasticSearchService.FindMessagesByDayAsync(year, month, day);
     }
-
+    
     [HttpGet("{year:int}-{month:int}-{day:int}-{hour:int}")]
     public async Task<IEnumerable<MessageElastic>> FindMessagesByHour(
         int year, int month, int day, int hour)
     {
         return new MessageElastic[1];
     }
-
+    
     [HttpGet("{id:length(24)}")]
     public async Task<ActionResult<MessageElastic>> Get(string id)
     {
@@ -49,7 +57,7 @@ public class ElasticSearchController : ControllerBase
 
         return message;
     }
-
+    
     [HttpPost]
     public async Task<IActionResult> Post(MessageElastic newMessage)
     {
@@ -68,10 +76,7 @@ public class ElasticSearchController : ControllerBase
 
         await _elasticSearchService.CreateManyAsync(newMessages);
 
-        return CreatedAtAction(nameof(Get), new
-        {
-            ids = newMessages.Select(message => message.BsonId)
-        }, newMessages);
+        return CreatedAtAction(nameof(Get), $"inserted {newMessages.Count} messages");
     }
     
     [HttpPut("{id:length(24)}")]
@@ -90,7 +95,7 @@ public class ElasticSearchController : ControllerBase
 
         return NoContent();
     }
-
+    
     [HttpDelete("{id:length(24)}")]
     public async Task<IActionResult> Delete(string id)
     {

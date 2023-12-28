@@ -140,7 +140,7 @@ services:
   nginx:
     image: nginx
     ports:
-      - 80:80
+      - 81:80
     depends_on:
       - api_node_01
       - api_node_02

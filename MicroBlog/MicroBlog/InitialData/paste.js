@@ -1,4 +1,5 @@
-a = {   
+user = {
+    "id": "",
     "XmlId":"-1",
     "Reputation":"1",
     "CreationDate":"2010-07-28T16:38:27.683",
@@ -11,4 +12,44 @@ a = {
     "UpVotes":"25243",
     "DownVotes":"217539",
     "AccountId":"-1"
+}
+
+message = {
+    "id": "",
+    "xmlId": 1,
+    "postTypeId": 1,
+    "acceptedAnswerId": 2,
+    "creationDate": "2010-07-28T19:04:21.300",
+    "score": 62,
+    "viewCount": 4484,
+    "body": "&lt;p&gt;Every time I turn on my computer, I see a message saying something like:&lt;/p&gt;&#xA;&#xA;&lt;pre&gt;&lt;code&gt;Your battery may be old or broken.&#xA;&lt;/code&gt;&lt;/pre&gt;&#xA;&#xA;&lt;p&gt;I am already aware that my battery is bad. How do I suppress this message?&lt;/p&gt;&#xA;",
+    "ownerUserId": 5,
+    "lastEditorUserId": 208574,
+    "lastEditDate": "2014-12-16T01:47:45.980",
+    "lastActivityDate": "2018-10-05T23:56:48.997",
+    "title": "How to get the &quot;Your battery is broken&quot; message to go away?",
+    "tags": "&lt;power-management&gt;&lt;notification&gt;",
+    "answerCount": 4,
+    "commentCount": 2,
+    "contentLicense": "CC BY-SA 3.0"
+}
+
+messageElastic = {
+    "bsonId": "",
+    "xmlId": 1,
+    "postTypeId": 1,
+    "acceptedAnswerId": 2,
+    "creationDate": "2010-07-28T19:04:21.300",
+    "score": 62,
+    "viewCount": 4484,
+    "body": "&lt;p&gt;Every time I turn on my computer, I see a message saying something like:&lt;/p&gt;&#xA;&#xA;&lt;pre&gt;&lt;code&gt;Your battery may be old or broken.&#xA;&lt;/code&gt;&lt;/pre&gt;&#xA;&#xA;&lt;p&gt;I am already aware that my battery is bad. How do I suppress this message?&lt;/p&gt;&#xA;",
+    "ownerUserId": 5,
+    "lastEditorUserId": 208574,
+    "lastEditDate": "2014-12-16T01:47:45.980",
+    "lastActivityDate": "2018-10-05T23:56:48.997",
+    "title": "How to get the &quot;Your battery is broken&quot; message to go away?",
+    "tags": "&lt;power-management&gt;&lt;notification&gt;",
+    "answerCount": 4,
+    "commentCount": 2,
+    "contentLicense": "CC BY-SA 3.0"
 }

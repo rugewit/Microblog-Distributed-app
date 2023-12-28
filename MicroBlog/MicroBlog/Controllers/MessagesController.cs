@@ -17,11 +17,11 @@ public class MessagesController : ControllerBase
     }
     
     [HttpGet]
-    public async Task<List<Message>> Get() =>
-        await _messagesService.GetAsync();
+    public async Task<IEnumerable<Message>> Get() =>
+        await _messagesService.GetLimitedAsync();
     
     [HttpGet("{limit}")]
-    public async Task<List<Message>> Get(int limit) =>
+    public async Task<IEnumerable<Message>> Get(int limit) =>
         await _messagesService.GetLimitedAsync(limit);
     
     [HttpGet("{id:length(24)}")]
@@ -41,6 +41,14 @@ public class MessagesController : ControllerBase
 
         return message;
     }
+    
+    [HttpGet("total-count")]
+    public async Task<long> GetTotalCount()
+    {
+        var totalCount = await _messagesService.GetTotalCount();
+        
+        return totalCount;
+    }
 
     [HttpPost]
     public async Task<IActionResult> Post(Message newMessage)
@@ -59,11 +67,8 @@ public class MessagesController : ControllerBase
         }
 
         await _messagesService.CreateManyAsync(newMessages);
-
-        return CreatedAtAction(nameof(Get), new
-        {
-            ids = newMessages.Select(message => message.Id)
-        }, newMessages);
+        
+        return CreatedAtAction(nameof(Get), $"inserted: {newMessages.Count} messages");
     }
     
     [HttpPut("{id:length(24)}")]

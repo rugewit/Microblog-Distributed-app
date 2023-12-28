@@ -6,3 +6,7 @@
 /MicroBlog/MicroBlog/.idea/
 .vs
 /MicroBlog/data
+/MicroBlog/DataLoader/bin
+/MicroBlog/DataLoader/obj
+/MicroBlog/DataLoaderGo/.idea
+/MicroBlog/DataLoaderGo/main

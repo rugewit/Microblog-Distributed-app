@@ -1,0 +1,12 @@
+1) docker-compose up -d --force-recreate --build = rebuild and recreate a docker compose
+2) docker-compose down = stop docker-compose
+3) docker stop $(docker ps -a -q) = stop all active containers
+4) docker logs CONTAINER_ID = get logs of CONTAINER_ID
+5) docker exec -it CONTAINER_ID bash = open bash in CONTAINER_ID
+6) mongosh = start mongo shell
+7) show dbs = show active databases
+8) use DB_NAME = start using DB_NAME
+9) db.getCollectionNames(); = get collection names
+10) db.UserAccounts.find().limit(1) = show 1 document
+11) db.UserAccounts.remove({}) - remove all documents
+12) 

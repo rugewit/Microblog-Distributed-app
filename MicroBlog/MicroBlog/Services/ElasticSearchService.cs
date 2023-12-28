@@ -9,14 +9,6 @@ using Nest;
 
 namespace MicroBlog.Services;
 
-public class Tweet
-{
-    public string BsonID { get; set; }
-    public string User { get; set; }
-    public DateTime PostDate { get; set; }
-    public string Message { get; set; }
-}
-
 public class ElasticSearchService : IElasticSearchService
 {
     private readonly ElasticClient _elasticsearchClient;
@@ -35,6 +27,8 @@ public class ElasticSearchService : IElasticSearchService
             .Index(_indexName)
             .Refresh(Refresh.WaitFor)
         );
+        
+        //var res = await _elasticsearchClient.IndexDocumentAsync(newMessage);
         if (!res.IsValid)
         {
             throw new Exception($"cannot index new Message Id={newMessage.BsonId}");
@@ -92,15 +86,39 @@ public class ElasticSearchService : IElasticSearchService
     public async Task<IEnumerable<MessageElastic>> GetAllAsync()
     {
         var res = await _elasticsearchClient.SearchAsync<MessageElastic>(s => s
-            .Index(_indexName)
-            .Size(1000));
+            .Index(_indexName));
         
         if (!res.IsValid)
         {
             throw new Exception($"cannot get all");
         }
-        Console.WriteLine(res.Documents.Count);
+        
         return res.Documents;
+    }
+    
+    public async Task<IEnumerable<MessageElastic>> GetLimitedAsync(int limit=200)
+    {
+        var res = await _elasticsearchClient.SearchAsync<MessageElastic>(s => s
+            .Index(_indexName)
+            .Size(limit));
+        
+        if (!res.IsValid)
+        {
+            throw new Exception($"cannot get all");
+        }
+        //Console.WriteLine(res.Documents.Count);
+        return res.Documents;
+    }
+    
+    public async Task<int> GetTotalCountAsync()
+    {
+        var res = await _elasticsearchClient.SearchAsync<MessageElastic>(s => s
+            .Index(_indexName));
+
+        if (res.IsValid) return res.Documents.Count;
+        
+        Console.WriteLine("result is not valid");
+        return 0;
     }
 
     public async Task<IEnumerable<MessageElastic>> FindMessagesByQueryAsync(string incomeQuery)
@@ -133,7 +151,6 @@ public class ElasticSearchService : IElasticSearchService
                     .Field(f => f.CreationDate)
                     .GreaterThanOrEquals(targetDate.Date)
                     .LessThan(targetDate.Date.AddDays(1))
-                    //.GreaterThan(targetDate.Date)
                 )
             )
             .Size(1000)
