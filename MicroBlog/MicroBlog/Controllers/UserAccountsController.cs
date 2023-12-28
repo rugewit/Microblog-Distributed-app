@@ -112,4 +112,12 @@ public class UserAccountsController : ControllerBase
 
         return NoContent();
     }
+    
+    [HttpDelete("delete-all")]
+    public async Task<IActionResult> DeleteAll()
+    {
+        await _userAccountsService.RemoveAllAsync();
+
+        return NoContent();
+    }
 }

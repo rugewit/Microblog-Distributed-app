@@ -1,9 +1,10 @@
 //using Elastic.Clients.Elasticsearch;
-using Nest;
+
+using Elastic.Clients.Elasticsearch;
 
 namespace MicroBlog.Providers.Interfaces;
 
 public interface IElasticSearchProvider
 {
-    public ElasticClient ElasticsearchClient { get; }
+    public ElasticsearchClient ElasticClient { get; }
 }

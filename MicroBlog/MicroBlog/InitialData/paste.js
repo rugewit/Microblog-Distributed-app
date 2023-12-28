@@ -35,7 +35,7 @@ message = {
 }
 
 messageElastic = {
-    "bsonId": "",
+    "bsonId": "507f1f77bcf86cd799439011",
     "xmlId": 1,
     "postTypeId": 1,
     "acceptedAnswerId": 2,

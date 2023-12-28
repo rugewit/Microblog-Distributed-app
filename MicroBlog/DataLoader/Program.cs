@@ -1,11 +1,94 @@
 ﻿using System.Net.Http.Json;
+using System.Text;
 using System.Xml.Serialization;
-using MicroBlog.Models;
-using MicroBlog.Utils;
+using DataLoader.Models;
 using Newtonsoft.Json;
 
 const string UsersPath = "/home/rugewit/MAI/nosql_dataset/askubuntu/Users.xml";
 const string PostsPath = "/home/rugewit/MAI/nosql_dataset/askubuntu/Posts.xml";
+
+
+static Message MessageRemoveQuotes(Message message)
+{
+    message.Id = "";
+    if (message.Body == null) message.Body = "";
+    if (message.Title == null) message.Title = "";
+    if (message.Tags == null) message.Tags = "";
+    if (message.ContentLicense == null) message.ContentLicense = "";
+    
+    message.Body = message.Body.Replace("\"", "");
+    message.Title = message.Title.Replace("\"", "");
+    message.Tags = message.Tags.Replace("\"", "");
+    message.ContentLicense = message.ContentLicense.Replace("\"", "");
+    
+    return message;
+}
+
+static UserAccount UserRemoveQuotes(UserAccount user)
+{
+    user.Id = "";
+    if (user.DisplayName == null) user.DisplayName = "";
+    if (user.WebsiteUrl == null) user.WebsiteUrl = "";
+    if (user.Location == null) user.Location = "";
+    if (user.AboutMe == null) user.AboutMe = "";
+    
+    user.DisplayName = user.DisplayName.Replace("\"", "");
+    user.WebsiteUrl = user.WebsiteUrl.Replace("\"", "");
+    user.Location = user.Location.Replace("\"", "");
+    user.AboutMe = user.AboutMe.Replace("\"", "");
+
+    return user;
+}
+
+static Message ModifyMessage(Message message)
+{
+    // Get the type of the Message class
+    Type messageType = typeof(Message);
+
+    // Get all string properties of the Message class
+    var stringProperties = messageType.GetProperties()
+        .Where(p => p.PropertyType == typeof(string));
+
+    // Iterate through each string property and replace 'a' with 'b'
+    foreach (var property in stringProperties)
+    {
+        string originalValue = (string) property.GetValue(message);
+        if (originalValue != null)
+        {
+            // Replace 'a' with 'b'
+            string modifiedValue = originalValue.Replace("\"", "");
+            // Set the modified value back to the property
+            property.SetValue(message, modifiedValue);
+        }
+    }
+
+    return message;
+}
+
+static UserAccount ModifyUserAccount(UserAccount userAccount)
+{
+    // Get the type of the Message class
+    Type userType = typeof(UserAccount);
+
+    // Get all string properties of the Message class
+    var stringProperties = userType.GetProperties()
+        .Where(p => p.PropertyType == typeof(string));
+
+    // Iterate through each string property and replace 'a' with 'b'
+    foreach (var property in stringProperties)
+    {
+        string originalValue = (string) property.GetValue(userAccount);
+        if (originalValue != null)
+        {
+            // Replace 'a' with 'b'
+            string modifiedValue = originalValue.Replace("\"", "");
+            // Set the modified value back to the property
+            property.SetValue(userAccount, modifiedValue);
+        }
+    }
+
+    return userAccount;
+}
 
 static UserAccount[] LoadUsers()
 {
@@ -70,14 +153,37 @@ if (postUsers)
     // POST USERS
     var usersSize = 1000;
 
-    var users = LoadUsers()[..usersSize].ToList();
+    var users = LoadUsers()[..usersSize].Select(UserRemoveQuotes).ToList();
+    
+    var usersJson = JsonConvert.SerializeObject(users);
 
-    var usersContent = JsonContent.Create(users[0]);
-
-    using var usersResponse = await httpClient.PostAsync("http://localhost:81/api/useraccounts/", 
+    var usersContent = new StringContent(usersJson, Encoding.UTF8, "application/json");
+    
+    using var usersResponse = await httpClient.PostAsync("http://localhost:81/api/useraccounts/multiple", 
         usersContent);
 
     var content = await usersResponse.Content.ReadAsStringAsync();
+
+    Console.WriteLine(content);
+}
+
+bool postMessages = true;
+
+if (postMessages)
+{
+    // POST MESSAGES
+    var messagesSize = 1000;
+
+    var messages = LoadMessages()[..messagesSize].Select(MessageRemoveQuotes).ToList();
+    
+    var messagesJson = JsonConvert.SerializeObject(messages);
+    
+    var messagesContent = new StringContent(messagesJson, Encoding.UTF8, "application/json");
+    
+    using var messagesResponse = await httpClient.PostAsync("http://localhost:81/api/messages/multiple", 
+        messagesContent);
+
+    var content = await messagesResponse.Content.ReadAsStringAsync();
 
     Console.WriteLine(content);
 }

@@ -58,7 +58,7 @@ public class UserAccountsService : IUserAccountsService
             //var userAccountMemCachedValue = await _memCache.GetAsync<string>(id);
             userAccount = JsonSerializer.Deserialize<UserAccount>(memCachedRes.Value);
             //Console.WriteLine("got from redis");
-            _logger.LogInformation($"{id} got from redis");
+            _logger.LogInformation($"{id} got from memcached");
         }
         else
         {
@@ -122,5 +122,10 @@ public class UserAccountsService : IUserAccountsService
             await _memCache.RemoveAsync(id);
         }
         await _userAccountsCollection.DeleteOneAsync(x => x.Id == id);
+    }
+    
+    public async Task RemoveAllAsync()
+    {
+        await _userAccountsCollection.DeleteManyAsync(_ => true);
     }
 }

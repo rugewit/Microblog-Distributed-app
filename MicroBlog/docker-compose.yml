@@ -42,36 +42,35 @@ x-redis-healthcheck: &redis-healthcheck
   healthcheck:
     test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
 
-
 services:
   api_node_01:
     <<: [ *api-config]
-
+  
   api_node_02:
     <<: [ *api-config ]
-
+    
   api_node_03:
     <<: [ *api-config ]
 
   mongo_db_node_01:
     image: mongo:7.0.2
     <<: [ *mongodb-healthcheck ]
-    volumes:
-      - ./data/mongo_node_01:/data/db
+    #volumes:
+    #  - ./data/mongo_node_01:/data/db
     command: mongod --replSet docker-replicaset
 
   mongo_db_node_02:
     image: mongo:7.0.2
     <<: [ *mongodb-healthcheck ]
-    volumes:
-      - ./data/mongo_node_02:/data/db
+    #volumes:
+    #  - ./data/mongo_node_02:/data/db
     command: mongod --replSet docker-replicaset
 
   mongo_db_node_03:
     image: mongo:7.0.2
     <<: [ *mongodb-healthcheck ]
-    volumes:
-      - ./data/mongo_node_03:/data/db
+    #volumes:
+    #  - ./data/mongo_node_03:/data/db
     command: mongod --replSet docker-replicaset
 
   mongo_cluster_init:
@@ -88,37 +87,37 @@ services:
     entrypoint: [ "mongosh", "--host", "mongo_db_node_01", "--file", "/scripts/init-mongo.js"]
 
   elasticsearch_node_01:
-    image: elasticsearch:8.10.2
+    image: elasticsearch:7.17.5
     <<: [ *elasticsearch-healthcheck ]
     environment:
       - node.name=elasticsearch_node_01
       - discovery.seed_hosts=elasticsearch_node_02,elasticsearch_node_03
     env_file:
       - MicroBlog/env/elasticsearch.env
-    volumes:
-      - ./data/elasticsearch_node_01:/usr/share/elasticsearch/data
+    #volumes:
+    #  - ./data/elasticsearch_node_01:/usr/share/elasticsearch/data
 
   elasticsearch_node_02:
-    image: elasticsearch:8.10.2
+    image: elasticsearch:7.17.5
     <<: [ *elasticsearch-healthcheck ]
     environment:
       - node.name=elasticsearch_node_02
       - discovery.seed_hosts=elasticsearch_node_01,elasticsearch_node_03
     env_file:
       - MicroBlog/env/elasticsearch.env
-    volumes:
-      - ./data/elasticsearch_node_02:/usr/share/elasticsearch/data
+    #volumes:
+    #  - ./data/elasticsearch_node_02:/usr/share/elasticsearch/data
 
   elasticsearch_node_03:
-    image: elasticsearch:8.10.2
+    image: elasticsearch:7.17.5
     <<: [ *elasticsearch-healthcheck ]
     environment:
       - node.name=elasticsearch_node_03
       - discovery.seed_hosts=elasticsearch_node_01,elasticsearch_node_02
     env_file:
       - MicroBlog/env/elasticsearch.env
-    volumes:
-      - ./data/elasticsearch_node_03:/usr/share/elasticsearch/data
+    #volumes:
+    #  - ./data/elasticsearch_node_03:/usr/share/elasticsearch/data
   
   redis:
     image: redis:alpine

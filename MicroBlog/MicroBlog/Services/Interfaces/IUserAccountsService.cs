@@ -19,4 +19,6 @@ public interface IUserAccountsService
     public Task<bool> UpdateAsync(string id, UserAccount updatedUserAccount);
 
     public Task RemoveAsync(string id);
+
+    public Task RemoveAllAsync();
 }

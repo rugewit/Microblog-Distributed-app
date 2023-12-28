@@ -87,7 +87,7 @@ func postUsers(users userArray) error {
 	return nil
 }
 
-func postMessagesDb(messages messageArray) error {
+func postMessages(messages messageArray) error {
 	messagesJson, err := json.Marshal(messages)
 	if err != nil {
 		return nil
@@ -104,25 +104,6 @@ func postMessagesDb(messages messageArray) error {
 		return nil
 	}
 	fmt.Printf("postMessagesDb resp is:%s\n", string(body))
-	return nil
-}
-
-func postMessagesElastic(messages messageArray) error {
-	messagesJson, err := json.Marshal(messages)
-	if err != nil {
-		return nil
-	}
-	messagesBody := bytes.NewBuffer(messagesJson)
-	resp, err := http.Post("http://localhost:81/api/elasticsearch/multiple", "application/json",
-		messagesBody)
-	if err != nil {
-		return nil
-	}
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil
-	}
-	fmt.Printf("postMessagesElastic resp is:%s\n", string(body))
 	return nil
 }
 
@@ -186,11 +167,14 @@ func main() {
 	}
 	fmt.Printf("check availability resp is:%s\n", string(body))
 
-	wg.Add(3)
+	wg.Add(2)
+
+	usersCount := 10
+	messagesCount := 10
 
 	go func() {
 		defer wg.Done()
-		err := postUsers(users[:10])
+		err := postUsers(users[:usersCount])
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -198,15 +182,7 @@ func main() {
 
 	go func() {
 		defer wg.Done()
-		err := postMessagesDb(messages[:5])
-		if err != nil {
-			log.Fatalln(err)
-		}
-	}()
-
-	go func() {
-		defer wg.Done()
-		err := postMessagesElastic(messages[:5])
+		err := postMessages(messages[:messagesCount])
 		if err != nil {
 			log.Fatalln(err)
 		}

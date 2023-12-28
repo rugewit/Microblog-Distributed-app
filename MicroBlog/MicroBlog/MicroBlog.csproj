@@ -12,9 +12,9 @@
         <PackageReference Include="EnyimMemcachedCore" Version="2.7.0" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.11" />
         <PackageReference Include="MongoDB.Driver" Version="2.22.0" />
-        <PackageReference Include="NEST" Version="7.17.5" />
         <PackageReference Include="NRedisStack" Version="0.9.0" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+        <PackageReference Include="Elastic.Clients.Elasticsearch" Version="8.11.0" />
     </ItemGroup>
 
     <ItemGroup>

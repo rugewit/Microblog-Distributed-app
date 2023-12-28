@@ -1,5 +1,8 @@
+using System.Runtime.InteropServices.ComTypes;
 using MicroBlog.Models;
+using MicroBlog.Services;
 using MicroBlog.Services.Interfaces;
+using MicroBlog.Utils;
 using Microsoft.AspNetCore.Mvc;
 using MongoUtils = MicroBlog.Utils.MongoUtils;
 
@@ -10,10 +13,12 @@ namespace MicroBlog.Controllers;
 public class MessagesController : ControllerBase
 {
     private readonly IMessagesService _messagesService;
+    private readonly ElasticSearchService _elasticSearchService;
 
-    public MessagesController(IMessagesService messagesService)
+    public MessagesController(IMessagesService messagesService, ElasticSearchService elasticSearchService)
     {
         _messagesService = messagesService;
+        _elasticSearchService = elasticSearchService;
     }
     
     [HttpGet]
@@ -43,17 +48,22 @@ public class MessagesController : ControllerBase
     }
     
     [HttpGet("total-count")]
-    public async Task<long> GetTotalCount()
+    public async Task<IActionResult> GetTotalCount()
     {
-        var totalCount = await _messagesService.GetTotalCount();
+        var totalCountDb = await _messagesService.GetTotalCount();
+        var totalCountElastic = await _elasticSearchService.GetTotalCountAsync();
         
-        return totalCount;
+        return Ok($"mongo messages: {totalCountDb}, elastic messages: {totalCountElastic}");
     }
 
     [HttpPost]
     public async Task<IActionResult> Post(Message newMessage)
     {
         await _messagesService.CreateAsync(newMessage);
+
+        var elasticMessage = ModelsUtils.MessageToMessageElastic(newMessage);
+
+        await _elasticSearchService.CreateAsync(elasticMessage);
 
         return CreatedAtAction(nameof(Get), new { id = newMessage.Id }, newMessage);
     }
@@ -67,6 +77,11 @@ public class MessagesController : ControllerBase
         }
 
         await _messagesService.CreateManyAsync(newMessages);
+
+        var elasticMessages = new List<MessageElastic>(newMessages.Count);
+        elasticMessages.AddRange(newMessages.Select(ModelsUtils.MessageToMessageElastic));
+
+        await _elasticSearchService.CreateManyAsync(elasticMessages);
         
         return CreatedAtAction(nameof(Get), $"inserted: {newMessages.Count} messages");
     }
@@ -89,6 +104,9 @@ public class MessagesController : ControllerBase
 
         await _messagesService.UpdateAsync(id, updatedMessage);
 
+        var elasticMessage = ModelsUtils.MessageToMessageElastic(updatedMessage);
+        await _elasticSearchService.UpdateAsync(id, elasticMessage);
+
         return NoContent();
     }
 
@@ -107,8 +125,17 @@ public class MessagesController : ControllerBase
         }
 
         await _messagesService.RemoveAsync(id);
+        await _elasticSearchService.DeleteAsync(id);
 
         return NoContent();
     }
     
+    [HttpDelete("delete-all")]
+    public async Task<IActionResult> DeleteAll()
+    {
+        await _messagesService.RemoveAllAsync();
+        await _elasticSearchService.DeleteAllAsync();
+        
+        return NoContent();
+    }
 }

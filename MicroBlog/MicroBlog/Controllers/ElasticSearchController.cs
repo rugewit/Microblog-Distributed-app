@@ -1,4 +1,5 @@
 using MicroBlog.Models;
+using MicroBlog.Services;
 using MicroBlog.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,43 +9,53 @@ namespace MicroBlog.Controllers;
 [Route("api/[controller]")]
 public class ElasticSearchController : ControllerBase
 {
-    private readonly IElasticSearchService _elasticSearchService;
+    private readonly ElasticSearchService _elasticSearchService;
 
-    public ElasticSearchController(IElasticSearchService elasticSearchService)
+    public ElasticSearchController(ElasticSearchService elasticSearchService)
     {
         _elasticSearchService = elasticSearchService;
     }
-    
+
     [HttpGet]
-    public async Task<IEnumerable<MessageElastic>> Get() =>
-        await _elasticSearchService.GetAllAsync();
-    
+    public async Task<IEnumerable<MessageElastic>> Get()
+    {
+        return await _elasticSearchService.GetLimitedAsync();
+    }
+
+    [HttpGet("{limit:int}")]
+    public async Task<IEnumerable<MessageElastic>> Get(int limit)
+    {
+        return await _elasticSearchService.GetLimitedAsync(limit);
+    }
+
+    /*
     [HttpGet("total-count")]
-    public async Task<int> GetTotalCount()
+    public async Task<long> GetTotalCount()
     {
         var count = await _elasticSearchService.GetTotalCountAsync();
         
         return count;
     }
-    
+    */
+    /*
     [HttpGet("{query}")]
     public async Task<IEnumerable<MessageElastic>> FindMessagesByQuery(string query) =>
         await _elasticSearchService.FindMessagesByQueryAsync(query);
-    
+    */
     [HttpGet("{year:int}-{month:int}-{day:int}")]
     public async Task<IEnumerable<MessageElastic>> FindMessagesByDay(
         int year, int month, int day)
     {
         return await _elasticSearchService.FindMessagesByDayAsync(year, month, day);
     }
-    
+    /*
     [HttpGet("{year:int}-{month:int}-{day:int}-{hour:int}")]
     public async Task<IEnumerable<MessageElastic>> FindMessagesByHour(
         int year, int month, int day, int hour)
     {
         return new MessageElastic[1];
     }
-    
+    */
     [HttpGet("{id:length(24)}")]
     public async Task<ActionResult<MessageElastic>> Get(string id)
     {
@@ -57,7 +68,7 @@ public class ElasticSearchController : ControllerBase
 
         return message;
     }
-    
+    /*
     [HttpPost]
     public async Task<IActionResult> Post(MessageElastic newMessage)
     {
@@ -110,4 +121,14 @@ public class ElasticSearchController : ControllerBase
 
         return NoContent();
     }
+    
+    
+    [HttpDelete("delete-all")]
+    public async Task<IActionResult> DeleteAll()
+    {
+        await _elasticSearchService.DeleteAllAsync();
+
+        return NoContent();
+    }
+    */
 }

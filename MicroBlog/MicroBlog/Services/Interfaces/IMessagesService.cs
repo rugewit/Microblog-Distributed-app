@@ -19,4 +19,6 @@ public interface IMessagesService
     public Task UpdateAsync(string id, Message updatedMessage);
 
     public Task RemoveAsync(string id);
+
+    public Task RemoveAllAsync();
 }

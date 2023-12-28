@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "Zrcj5kAcwu8K5Yimg5uvRS0zDy2Ekc9EG4IKcBViJctNqon1zdM2MPfnlADBG6S1pWjDUT4HbHiiFjU7dqdy9w==",
+  "dgSpecHash": "P8GKLr0vAX4/wseQSP2QPkP0Gu+v0GFJ6MOYren1Z7pR8HlPfCqd4N4bfCCMD2xWAXGrR6vGmoHB8rDaQDyOVQ==",
   "success": true,
   "projectFilePath": "/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Tests/Tests.csproj",
   "expectedPackageFiles": [
@@ -8,6 +8,8 @@
     "/home/rugewit/.nuget/packages/awssdk.securitytoken/3.7.100.14/awssdk.securitytoken.3.7.100.14.nupkg.sha512",
     "/home/rugewit/.nuget/packages/coverlet.collector/3.2.0/coverlet.collector.3.2.0.nupkg.sha512",
     "/home/rugewit/.nuget/packages/dnsclient/1.6.1/dnsclient.1.6.1.nupkg.sha512",
+    "/home/rugewit/.nuget/packages/elastic.clients.elasticsearch/8.11.0/elastic.clients.elasticsearch.8.11.0.nupkg.sha512",
+    "/home/rugewit/.nuget/packages/elastic.transport/0.4.16/elastic.transport.0.4.16.nupkg.sha512",
     "/home/rugewit/.nuget/packages/elasticsearch.net/7.17.5/elasticsearch.net.7.17.5.nupkg.sha512",
     "/home/rugewit/.nuget/packages/enyimmemcachedcore/2.7.0/enyimmemcachedcore.2.7.0.nupkg.sha512",
     "/home/rugewit/.nuget/packages/messagepack/2.5.140/messagepack.2.5.140.nupkg.sha512",

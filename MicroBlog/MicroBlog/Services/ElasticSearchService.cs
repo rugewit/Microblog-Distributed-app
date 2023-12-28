@@ -1,184 +1,159 @@
-using Elasticsearch.Net;
+using Elastic.Clients.Elasticsearch;
+using Elastic.Transport;
 using MicroBlog.Models;
-using MicroBlog.Models.Settings;
-using MicroBlog.Providers.Interfaces;
-using MicroBlog.Services.Interfaces;
-using Microsoft.Extensions.Options;
-using MongoDB.Bson;
-using Nest;
 
 namespace MicroBlog.Services;
 
-public class ElasticSearchService : IElasticSearchService
+public class ElasticSearchService
 {
-    private readonly ElasticClient _elasticsearchClient;
-    private readonly string _indexName;
-    
+    /*
+      private readonly ElasticsearchClient _elasticsearchClient;
+       private readonly string _index;
+       private readonly ILogger<ElasticSearchService> _logger;
     public ElasticSearchService(IElasticSearchProvider elasticSearchProvider, 
-        IOptions<ElasticSearchSettings> elasticSearchSettings)
+        IOptions<ElasticSearchSettings> elasticSearchSettings, ILogger<ElasticSearchService> logger)
     {
-        _elasticsearchClient = elasticSearchProvider.ElasticsearchClient;
-        _indexName = elasticSearchSettings.Value.IndexName;
+        _elasticsearchClient = elasticSearchProvider.ElasticClient;
+        _logger = logger;
+        _index = "messages";
+        _elasticsearchClient.Indices.Create(_index);
     }
+    */
     
-    public async Task CreateAsync(MessageElastic newMessage)
+    private ElasticsearchClient _elasticsearchClient;
+    private string _index;
+    private ILogger _logger;
+    
+    public ElasticSearchService(ILogger<ElasticSearchService> logger)
     {
-        var res = await _elasticsearchClient.IndexAsync(newMessage, idx => idx
-            .Index(_indexName)
-            .Refresh(Refresh.WaitFor)
-        );
-        
-        //var res = await _elasticsearchClient.IndexDocumentAsync(newMessage);
-        if (!res.IsValid)
+        var nodes = new[]
         {
-            throw new Exception($"cannot index new Message Id={newMessage.BsonId}");
-        }
+            new Uri("http://elasticsearch_node_01:9200"),
+            new Uri("http://elasticsearch_node_02:9200"),
+            new Uri("http://elasticsearch_node_03:9200"),
+        };
+
+        var connectionPool = new StaticNodePool(nodes);
+
+        var settings = new ElasticsearchClientSettings(connectionPool);
+
+        var client = new ElasticsearchClient(settings);
+        
+        _index = "messages";
+        var responseCreateIndex = client.Indices.Create(_index);
+        _elasticsearchClient = client;
+        _logger = logger;
+        Console.WriteLine("ElasticService constructor");
+        _logger.LogInformation("ElasticService constructor");
     }
     
-    public async Task CreateManyAsync(IEnumerable<MessageElastic> newMessages)
+    public async Task CreateAsync(MessageElastic messageElastic)
     {
-        var res = await _elasticsearchClient.IndexManyAsync(newMessages);
+        var response = await _elasticsearchClient.IndexAsync(messageElastic, _index);
+        //_logger.LogInformation($"Create: {response.IsValidResponse}");
+    }
+    
+    public async Task CreateManyAsync(IEnumerable<MessageElastic> messages)
+    {
+        var response = await _elasticsearchClient.IndexManyAsync(messages, _index);
+        //_logger.LogInformation($"Create: {response.IsValidResponse}");
     }
 
     public async Task<bool> UpdateAsync(string id, MessageElastic newMessage)
     {
-        var doc = await _elasticsearchClient.SearchAsync<MessageElastic>(s => s
-            .Index(_indexName)
-            .Query(q => q
-                .Match(m => m
-                    .Field(f => f.BsonId)
-                    .Query(id)
+        var doc = await _elasticsearchClient.SearchAsync<MessageElastic>(s
+            => s.Index(_index)
+                .Query(q 
+                    => q.Term(t => t.BsonId, id)
                 )
-            )
         );
-        
-        var resUpdate = await _elasticsearchClient.UpdateAsync<MessageElastic, MessageElastic>
-            ( doc.Hits.FirstOrDefault().Id, u => u.Doc(newMessage));
-                
-        if (!resUpdate.IsValid)
+        var resUpdate = await _elasticsearchClient.UpdateAsync<MessageElastic, MessageElastic>(_index,
+            doc.Hits.FirstOrDefault().Id, u => u.Doc(newMessage));
+        if (!resUpdate.IsValidResponse)
         {
-            throw new Exception($"3 cannot index new Messages");
+            return false;
         }
-
         return true;
     }
-    
-    public async Task<MessageElastic> GetAsync(string id)
-    {
-        var doc = await _elasticsearchClient.SearchAsync<MessageElastic>(s => s
-            .Index(_indexName)
-            .Query(q => q
-                .Match(m => m
-                    .Field(f => f.BsonId)
-                    .Query(id)
-                )
-            )
-        );
-        
-        if (!doc.IsValid)
-        {
-            throw new Exception($"1 cannot find index to update");
-        }
-        
-        return doc.Documents.FirstOrDefault();
-    }
 
-    public async Task<IEnumerable<MessageElastic>> GetAllAsync()
-    {
-        var res = await _elasticsearchClient.SearchAsync<MessageElastic>(s => s
-            .Index(_indexName));
-        
-        if (!res.IsValid)
-        {
-            throw new Exception($"cannot get all");
-        }
-        
-        return res.Documents;
-    }
-    
-    public async Task<IEnumerable<MessageElastic>> GetLimitedAsync(int limit=200)
-    {
-        var res = await _elasticsearchClient.SearchAsync<MessageElastic>(s => s
-            .Index(_indexName)
-            .Size(limit));
-        
-        if (!res.IsValid)
-        {
-            throw new Exception($"cannot get all");
-        }
-        //Console.WriteLine(res.Documents.Count);
-        return res.Documents;
-    }
-    
-    public async Task<int> GetTotalCountAsync()
-    {
-        var res = await _elasticsearchClient.SearchAsync<MessageElastic>(s => s
-            .Index(_indexName));
-
-        if (res.IsValid) return res.Documents.Count;
-        
-        Console.WriteLine("result is not valid");
-        return 0;
-    }
-
-    public async Task<IEnumerable<MessageElastic>> FindMessagesByQueryAsync(string incomeQuery)
-    {
-        var res = await _elasticsearchClient.SearchAsync<MessageElastic>(s => s
-            .Index(_indexName)
-            .Query(q => q
-                .Match(m => m
-                    .Field(f => f.Body)
-                    .Query(incomeQuery)
-                )
-            )
-        );
-        
-        if (!res.IsValid)
-        {
-            throw new Exception($"cannot find messages");
-        }
-
-        return res.Documents;
-    }
-    
-    public async Task<IEnumerable<MessageElastic>> FindMessagesByDayAsync(int year, int month, int day)
-    {
-        var targetDate = new DateTime(year, month, day);
-        var searchResponse = await _elasticsearchClient.SearchAsync<MessageElastic>(s => s
-            .Index(_indexName)
-            .Query(q => q
-                .DateRange(r => r
-                    .Field(f => f.CreationDate)
-                    .GreaterThanOrEquals(targetDate.Date)
-                    .LessThan(targetDate.Date.AddDays(1))
-                )
-            )
-            .Size(1000)
-        );
-        Console.WriteLine(searchResponse.Documents.Count);
-        return searchResponse.Documents;
-    }
-    
-    public Task<IEnumerable<MessageElastic>> FindMessagesByHourAsync(int year, int month, int day, int hour)
+    public Task<IEnumerable<MessageElastic>> FindMessagesByQueryAsync(string incomeQuery)
     {
         throw new NotImplementedException();
     }
 
     public async Task DeleteAsync(string id)
     {
-        /*
-        var res = await _elasticsearchClient.DeleteAsync(id);
-        
-        if (!res.IsValid)
-        {
-            throw new Exception($"cannot delete messages");
-        }
-        */
+        var doc = await _elasticsearchClient.SearchAsync<MessageElastic>(s
+            => s.Index(_index)
+                .Query(q 
+                    => q.Term(t => t.BsonId, id)
+                )
+        );
+        var deleteReq = new DeleteRequest(_index, doc.Hits.FirstOrDefault().Id);
+        await _elasticsearchClient.DeleteAsync(deleteReq);
+    }
+
+    public async Task<MessageElastic> GetAsync(string id)
+    {
+        var response = await _elasticsearchClient.SearchAsync<MessageElastic>(s
+            => s.Index(_index)
+                .Query(q 
+                    => q.Term(t => t.BsonId, id)
+                )
+            );
+        //_logger.LogInformation($"Get: {response.IsValidResponse}");
+        return response.Documents.FirstOrDefault();
+    }
+    
+    public async Task<IEnumerable<MessageElastic>> GetAllAsync()
+    {
+        var response = await _elasticsearchClient.SearchAsync<MessageElastic>(s
+            => s.Index(_index));
+        //_logger.LogInformation($"GetAll: {response.IsValidResponse}");
+        return response.Documents;
+    }
+
+    public async Task<IEnumerable<MessageElastic>> GetLimitedAsync(int limit = 200)
+    {
+        var response = await _elasticsearchClient.SearchAsync<MessageElastic>(s
+            => s.Index(_index).From(0).Size(limit));
+        return response.Documents;
+    }
+
+    public async Task<long> GetTotalCountAsync()
+    {
+        var countRequest = new CountRequest(Indices.Index(_index));
+        var count = (await _elasticsearchClient.CountAsync(countRequest)).Count;
+        return count;
+    }
+
+    public async Task<IEnumerable<MessageElastic>> FindMessagesByDayAsync(int year, int month, int day)
+    {
+        var targetDate = new DateTime(year, month, day);
+        var searchResponse = await _elasticsearchClient.SearchAsync<MessageElastic>(s => s
+            .Index(_index)
+            .Query(q => q
+                .Range(r => r
+                    .DateRange(f => f.Field(
+                        h => h.CreationDate)
+                        .Gte(targetDate.Date).Lt(targetDate.Date.AddDays(1)))
+                )
+            )
+            .Size(1000)
+        );
+        //_logger.LogInformation($"FindMessagesByDayAsync: {searchResponse.IsValidResponse}");
+        Console.WriteLine(searchResponse.Documents.Count);
+        return searchResponse.Documents;
+    }
+
+    public Task<IEnumerable<MessageElastic>> FindMessagesByHourAsync(int year, int month, int day, int hour)
+    {
         throw new NotImplementedException();
     }
 
-    public string GetRootNodeInfo()
+    public async Task DeleteAllAsync()
     {
-        return _elasticsearchClient.RootNodeInfo().ToString();
+        await _elasticsearchClient.DeleteByQueryAsync<MessageElastic>(_index, q =>
+            q.Query(rq => rq.MatchAll()));
     }
 }
