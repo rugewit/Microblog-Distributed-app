@@ -25,106 +25,106 @@
 
 Запускаем приложение
 
-![1](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/1.png)
+![1](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/1.png)
 
 Работает
 
-![2](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/2.png)
+![2](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/2.png)
 
 Отключим 1 монго-ноду
 
-![3](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/3.png)
+![3](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/3.png)
 
 Работает
 
-![4](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/4.png)
+![4](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/4.png)
 
 Отключим еще 1 монго-ноду
 
-![5](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/5.png)
+![5](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/5.png)
 
 Ошибка
 
-![6](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/6.png)
+![6](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/6.png)
 
-![7](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/7.png)
+![7](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/7.png)
 
 Восстановим монго-ноды
 
-![8](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/8.png)
+![8](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/8.png)
 
 Работает
 
-![9](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/9.png)
+![9](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/9.png)
 
 Отключим 1 elastic ноду
 
-![10](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/10.png)
+![10](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/10.png)
 
 Работает
 
-![11](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/11.png)
+![11](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/11.png)
 
 Отключим еще одну elastic ноду
 
-![12](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/12.png)
+![12](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/12.png)
 
 Работает
 
-![13](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/13.png)
+![13](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/13.png)
 
 Отключим последнюю elastic ноду
 
-![14](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/14.png)
+![14](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/14.png)
 
 Перестало работать
 
-![15](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/15.png)
+![15](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/15.png)
 
 Восстановим elastic ноды
 
-![16](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/16.png)
+![16](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/16.png)
 
 Работает
 
-![17](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/17.png)
+![17](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/17.png)
 
 Отключим 2 апи ноды
 
-![18](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/18.png)
+![18](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/18.png)
 
 Работает
 
-![19](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/19.png)
+![19](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/19.png)
 
 Отключим последнюю апи ноду
 
-![20](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/20.png)
+![20](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/20.png)
 
 Теперь не работает
 
-![21](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/21.png)
+![21](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/21.png)
 
 Восстановим апи ноды
 
-![22](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/22.png)
+![22](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/22.png)
 
 Работает
 
-![23](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/23.png)
+![23](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/23.png)
 
 Отключим 2 кеш ноды
 
-![24](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/24.png)
+![24](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/24.png)
 
 Работает
 
-![25](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/25.png)
+![25](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/25.png)
 
 Отключим последнюю кеш ноду
 
-![26](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/26.png)
+![26](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/26.png)
 
 Работает. но все значения возвращаются из монго
 
-![27](/home/rugewit/Programming/Microblog-Distributed-app/MicroBlog/Images/27.png)
+![27](https://github.com/rugewit/Microblog-Distributed-app/blob/main/MicroBlog/Images/27.png)
