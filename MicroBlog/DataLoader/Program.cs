@@ -106,8 +106,8 @@ if (checkAvailability)
     Console.WriteLine(content);
 }
 
-var usersSize = 15555;
-var messagesSize = 15555;
+var usersSize = 30_000;
+var messagesSize = 30_000;
 
 var batchSize = 2000;
 
