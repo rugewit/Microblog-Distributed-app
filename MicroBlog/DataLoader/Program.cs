@@ -1,12 +1,10 @@
-﻿using System.Net.Http.Json;
-using System.Text;
+﻿using System.Text;
 using System.Xml.Serialization;
 using DataLoader.Models;
 using Newtonsoft.Json;
 
 const string UsersPath = "/home/rugewit/MAI/nosql_dataset/askubuntu/Users.xml";
 const string PostsPath = "/home/rugewit/MAI/nosql_dataset/askubuntu/Posts.xml";
-
 
 static Message MessageRemoveQuotes(Message message)
 {
@@ -38,56 +36,6 @@ static UserAccount UserRemoveQuotes(UserAccount user)
     user.AboutMe = user.AboutMe.Replace("\"", "");
 
     return user;
-}
-
-static Message ModifyMessage(Message message)
-{
-    // Get the type of the Message class
-    Type messageType = typeof(Message);
-
-    // Get all string properties of the Message class
-    var stringProperties = messageType.GetProperties()
-        .Where(p => p.PropertyType == typeof(string));
-
-    // Iterate through each string property and replace 'a' with 'b'
-    foreach (var property in stringProperties)
-    {
-        string originalValue = (string) property.GetValue(message);
-        if (originalValue != null)
-        {
-            // Replace 'a' with 'b'
-            string modifiedValue = originalValue.Replace("\"", "");
-            // Set the modified value back to the property
-            property.SetValue(message, modifiedValue);
-        }
-    }
-
-    return message;
-}
-
-static UserAccount ModifyUserAccount(UserAccount userAccount)
-{
-    // Get the type of the Message class
-    Type userType = typeof(UserAccount);
-
-    // Get all string properties of the Message class
-    var stringProperties = userType.GetProperties()
-        .Where(p => p.PropertyType == typeof(string));
-
-    // Iterate through each string property and replace 'a' with 'b'
-    foreach (var property in stringProperties)
-    {
-        string originalValue = (string) property.GetValue(userAccount);
-        if (originalValue != null)
-        {
-            // Replace 'a' with 'b'
-            string modifiedValue = originalValue.Replace("\"", "");
-            // Set the modified value back to the property
-            property.SetValue(userAccount, modifiedValue);
-        }
-    }
-
-    return userAccount;
 }
 
 static UserAccount[] LoadUsers()
@@ -130,6 +78,18 @@ static Message[] LoadMessages()
     return messageCollection.Messages;
 }
 
+
+static async Task<string> PostDataAsync<T>(IEnumerable<T> curBatch, HttpClient httpClient, string url)
+{
+    var dataJson = JsonConvert.SerializeObject(curBatch);
+    var dataContent = new StringContent(dataJson, Encoding.UTF8, "application/json");
+    using var response = await httpClient.PostAsync(url, dataContent);
+    
+    var content = await response.Content.ReadAsStringAsync();
+    return content;
+}
+
+
 var httpClient = new HttpClient();
 
 bool checkAvailability = true;
@@ -146,46 +106,85 @@ if (checkAvailability)
     Console.WriteLine(content);
 }
 
-bool postUsers = true;
+var usersSize = 15555;
+var messagesSize = 15555;
+
+var batchSize = 2000;
+
+var postUsers = true;
+var postMessages = true;
 
 if (postUsers)
 {
     // POST USERS
-    var usersSize = 1000;
+    const string usersUrl = "http://localhost:81/api/useraccounts/multiple";
 
     var users = LoadUsers()[..usersSize].Select(UserRemoveQuotes).ToList();
     
-    var usersJson = JsonConvert.SerializeObject(users);
+    if (usersSize < batchSize)
+    {
+        var res = await PostDataAsync(users, httpClient, usersUrl);
+        Console.WriteLine(res);
+    }
+    else
+    {
+        var curBatch = new List<UserAccount>();
+        for (var i = 1; i <= users.Count; i++)
+        {
+            curBatch.Add(users[i-1]);
+            if (i % batchSize == 0)
+            {
+                var res = await PostDataAsync(curBatch, httpClient, usersUrl);
+                Console.WriteLine(res);
+                curBatch.Clear();
+                Console.WriteLine($"***********************\ni={i} users is already inserted");
+            }
+        }
 
-    var usersContent = new StringContent(usersJson, Encoding.UTF8, "application/json");
-    
-    using var usersResponse = await httpClient.PostAsync("http://localhost:81/api/useraccounts/multiple", 
-        usersContent);
-
-    var content = await usersResponse.Content.ReadAsStringAsync();
-
-    Console.WriteLine(content);
+        if (curBatch.Count != 0)
+        {
+            var res = await PostDataAsync(curBatch, httpClient, usersUrl);
+            Console.WriteLine(res);
+            curBatch.Clear();
+        }
+    }
 }
 
-bool postMessages = true;
 
 if (postMessages)
 {
     // POST MESSAGES
-    var messagesSize = 1000;
+    const string messagesUrl = "http://localhost:81/api/messages/multiple";
 
     var messages = LoadMessages()[..messagesSize].Select(MessageRemoveQuotes).ToList();
     
-    var messagesJson = JsonConvert.SerializeObject(messages);
-    
-    var messagesContent = new StringContent(messagesJson, Encoding.UTF8, "application/json");
-    
-    using var messagesResponse = await httpClient.PostAsync("http://localhost:81/api/messages/multiple", 
-        messagesContent);
+    if (messagesSize < batchSize)
+    {
+        var res = await PostDataAsync(messages, httpClient, messagesUrl);
+        Console.WriteLine(res);
+    }
+    else
+    {
+        var curBatch = new List<Message>();
+        for (var i = 1; i <= messages.Count; i++)
+        {
+            curBatch.Add(messages[i-1]);
+            if (i % batchSize == 0)
+            {
+                var res = await PostDataAsync(curBatch, httpClient, messagesUrl);
+                Console.WriteLine(res);
+                curBatch.Clear();
+                Console.WriteLine($"***********************\ni={i} messages is already inserted");
+            }
+        }
 
-    var content = await messagesResponse.Content.ReadAsStringAsync();
-
-    Console.WriteLine(content);
+        if (curBatch.Count != 0)
+        {
+            var res = await PostDataAsync(curBatch, httpClient, messagesUrl);
+            Console.WriteLine(res);
+            curBatch.Clear();
+        }
+    }
 }
 
 
