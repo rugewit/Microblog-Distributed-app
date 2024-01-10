@@ -4,5 +4,5 @@ namespace MicroBlog.Providers.Interfaces;
 
 public interface IMongoDbProvider
 {
-    public IMongoDatabase MongoDatabase { get; }
+    public IMongoDatabase GetDb();
 }

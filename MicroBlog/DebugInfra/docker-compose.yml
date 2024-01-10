@@ -1,0 +1,129 @@
+x-mongodb-healthcheck: &mongodb-healthcheck
+  healthcheck:
+    test: echo 'db.runCommand("ping").ok' | mongosh 127.0.0.1:27017/test --quiet
+    interval: 10s
+    timeout: 10s
+    retries: 5
+    start_period: 40s
+
+x-elasticsearch-healthcheck: &elasticsearch-healthcheck
+  healthcheck:
+    interval: 5s
+    retries: 80
+    test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://127.0.0.1:9200
+
+x-memcached-healthcheck: &memcached-healthcheck
+  healthcheck:
+    test: echo stats | nc 127.0.0.1 11211
+    interval: 10s
+    retries: 60
+
+x-redis-healthcheck: &redis-healthcheck
+  healthcheck:
+    test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+  
+
+services:
+  mongo_db_node_01:
+    image: mongo:6.0.12
+    <<: [ *mongodb-healthcheck ]
+    #volumes:
+    #  - ./data/mongo_node_01:/data/db
+    command: mongod --replSet docker-replicaset
+    ports:
+      - 27017:27017
+
+  mongo_db_node_02:
+    image: mongo:6.0.12
+    <<: [ *mongodb-healthcheck ]
+    #volumes:
+    #  - ./data/mongo_node_02:/data/db
+    command: mongod --replSet docker-replicaset
+    ports:
+      - 27018:27017
+
+  mongo_db_node_03:
+    image: mongo:6.0.12
+    <<: [ *mongodb-healthcheck ]
+    #volumes:
+    #  - ./data/mongo_node_03:/data/db
+    command: mongod --replSet docker-replicaset
+    ports:
+      - 27019:27017
+
+  mongo_cluster_init:
+    image: mongo:6.0.12
+    depends_on:
+      mongo_db_node_01:
+        condition: service_healthy
+      mongo_db_node_02:
+        condition: service_healthy
+      mongo_db_node_03:
+        condition: service_healthy
+    volumes:
+      - ./env/init-mongo.js:/scripts/init-mongo.js:ro
+    #extra_hosts:
+    #  - "host.docker.internal:host-gateway"
+    entrypoint: [ "mongosh", "--host", "mongo_db_node_01", "--port", "27017", "--file", "/scripts/init-mongo.js"]
+
+  elasticsearch_node_01:
+    image: elasticsearch:7.17.5
+    <<: [ *elasticsearch-healthcheck ]
+    environment:
+      - node.name=elasticsearch_node_01
+      - discovery.seed_hosts=elasticsearch_node_02,elasticsearch_node_03
+    env_file:
+      - env/elasticsearch.env
+    #volumes:
+    #  - ./data/elasticsearch_node_01:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+
+  elasticsearch_node_02:
+    image: elasticsearch:7.17.5
+    <<: [ *elasticsearch-healthcheck ]
+    environment:
+      - node.name=elasticsearch_node_02
+      - discovery.seed_hosts=elasticsearch_node_01,elasticsearch_node_03
+    env_file:
+      - env/elasticsearch.env
+    #volumes:
+    #  - ./data/elasticsearch_node_02:/usr/share/elasticsearch/data
+    ports:
+      - 9201:9200
+
+  elasticsearch_node_03:
+    image: elasticsearch:7.17.5
+    <<: [ *elasticsearch-healthcheck ]
+    environment:
+      - node.name=elasticsearch_node_03
+      - discovery.seed_hosts=elasticsearch_node_01,elasticsearch_node_02
+    env_file:
+      - env/elasticsearch.env
+    #volumes:
+    #  - ./data/elasticsearch_node_03:/usr/share/elasticsearch/data
+    ports:
+      - 9202:9200
+  
+  redis:
+    image: redis:alpine
+    ports:
+      - '6379:6379'
+  
+  memcached_node_01:
+    image: memcached:alpine
+    <<: [ *memcached-healthcheck ]
+    ports:
+      - 11211:11211
+
+  memcached_node_02:
+    image: memcached:alpine
+    <<: [ *memcached-healthcheck ]
+    ports:
+      - 11212:11211
+    
+  memcached_node_03:
+    image: memcached:alpine
+    <<: [ *memcached-healthcheck ]
+    ports:
+      - 11213:11211

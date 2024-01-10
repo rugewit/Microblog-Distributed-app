@@ -97,7 +97,7 @@ bool checkAvailability = true;
 if (checkAvailability)
 {
     // check availability
-    var address = "http://localhost:81/";
+    var address = "http://localhost:5002/";
 
     using var response = await httpClient.GetAsync(address);
 
@@ -117,7 +117,7 @@ var postMessages = true;
 if (postUsers)
 {
     // POST USERS
-    const string usersUrl = "http://localhost:81/api/useraccounts/multiple";
+    const string usersUrl = "http://localhost:5002/api/useraccounts/multiple";
 
     var users = LoadUsers()[..usersSize].Select(UserRemoveQuotes).ToList();
     
@@ -154,7 +154,7 @@ if (postUsers)
 if (postMessages)
 {
     // POST MESSAGES
-    const string messagesUrl = "http://localhost:81/api/messages/multiple";
+    const string messagesUrl = "http://localhost:5002/api/messages/multiple";
 
     var messages = LoadMessages()[..messagesSize].Select(MessageRemoveQuotes).ToList();
     

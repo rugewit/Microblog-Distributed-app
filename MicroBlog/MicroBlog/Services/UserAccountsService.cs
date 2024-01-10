@@ -27,13 +27,13 @@ public class UserAccountsService : IUserAccountsService
         ILogger<UserAccountsService> logger, IMemCacheProvider memCacheProvider)
     {
         var collectionName = databaseSettings.Value.UserAccountsCollectionName;
-        _userAccountsCollection = mongoDbProvider.MongoDatabase.GetCollection<UserAccount>(collectionName);
+        _userAccountsCollection = mongoDbProvider.GetDb().GetCollection<UserAccount>(collectionName);
         _redisDb = redisProvider.GetRedisDb();
         _logger = logger;
 
         _userAccExpireTimeSec = userAccExpireSettings.Value.UserAccountCacheExpireTimeSec;
         _redactionTimeSimulationSec = userAccExpireSettings.Value.RedactionTimeSimulationSec;
-        _memCache = memCacheProvider.MemcachedClient;
+        _memCache = memCacheProvider.GetClient();
     }
     
     public async Task<IEnumerable<UserAccount>> GetLimitedAsync(int limit = 200) =>

@@ -6,5 +6,5 @@ namespace MicroBlog.Providers.Interfaces;
 
 public interface IElasticSearchProvider
 {
-    public ElasticsearchClient ElasticClient { get; }
+    public ElasticsearchClient GetClient();
 }

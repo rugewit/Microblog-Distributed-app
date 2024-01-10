@@ -1,48 +1,28 @@
 using Elastic.Clients.Elasticsearch;
 using Elastic.Transport;
 using MicroBlog.Models;
+using MicroBlog.Models.Settings;
+using MicroBlog.Providers.Interfaces;
+using MicroBlog.Services.Interfaces;
+using Microsoft.Extensions.Options;
 
 namespace MicroBlog.Services;
 
-public class ElasticSearchService
+public class ElasticSearchService : IElasticSearchService
 {
-    /*
-      private readonly ElasticsearchClient _elasticsearchClient;
-       private readonly string _index;
-       private readonly ILogger<ElasticSearchService> _logger;
+    private readonly ElasticsearchClient _elasticsearchClient;
+    private readonly string _index;
+    private readonly ILogger _logger;
+    
     public ElasticSearchService(IElasticSearchProvider elasticSearchProvider, 
-        IOptions<ElasticSearchSettings> elasticSearchSettings, ILogger<ElasticSearchService> logger)
+        ILogger<ElasticSearchService> logger, IOptions<ElasticSearchSettings> elasticSearchSettings)
     {
-        _elasticsearchClient = elasticSearchProvider.ElasticClient;
+        _elasticsearchClient = elasticSearchProvider.GetClient();
+        _index = elasticSearchSettings.Value.IndexName;
         _logger = logger;
-        _index = "messages";
-        _elasticsearchClient.Indices.Create(_index);
-    }
-    */
-    
-    private ElasticsearchClient _elasticsearchClient;
-    private string _index;
-    private ILogger _logger;
-    
-    public ElasticSearchService(ILogger<ElasticSearchService> logger)
-    {
-        var nodes = new[]
-        {
-            new Uri("http://elasticsearch_node_01:9200"),
-            new Uri("http://elasticsearch_node_02:9200"),
-            new Uri("http://elasticsearch_node_03:9200"),
-        };
-
-        var connectionPool = new StaticNodePool(nodes);
-
-        var settings = new ElasticsearchClientSettings(connectionPool);
-
-        var client = new ElasticsearchClient(settings);
         
-        _index = "messages";
-        var responseCreateIndex = client.Indices.Create(_index);
-        _elasticsearchClient = client;
-        _logger = logger;
+        var responseCreateIndex = _elasticsearchClient.Indices.Create(_index);
+        
         Console.WriteLine("ElasticService constructor");
         _logger.LogInformation("ElasticService constructor");
     }

@@ -13,9 +13,9 @@ namespace MicroBlog.Controllers;
 public class MessagesController : ControllerBase
 {
     private readonly IMessagesService _messagesService;
-    private readonly ElasticSearchService _elasticSearchService;
+    private readonly IElasticSearchService _elasticSearchService;
 
-    public MessagesController(IMessagesService messagesService, ElasticSearchService elasticSearchService)
+    public MessagesController(IMessagesService messagesService, IElasticSearchService elasticSearchService)
     {
         _messagesService = messagesService;
         _elasticSearchService = elasticSearchService;

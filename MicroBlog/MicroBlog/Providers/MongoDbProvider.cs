@@ -8,17 +8,20 @@ namespace MicroBlog.Providers;
 
 public class MongoDbProvider : IMongoDbProvider
 {
-    public IMongoDatabase MongoDatabase { get; }
-
+    private readonly IMongoDatabase _db;
     public MongoDbProvider(IOptions<MicroBlogDatabaseSettings> databaseSettings, 
         ILogger<MongoDbProvider> logger)
     {
-        //Console.WriteLine("MongoDbService CONSTRUCTOR");
         logger.LogInformation("MongoDbService CONSTRUCTOR is up");
         var mongoClient = new MongoClient(
             databaseSettings.Value.ConnectionString);
 
-        MongoDatabase = mongoClient.GetDatabase(
+        _db = mongoClient.GetDatabase(
             databaseSettings.Value.DatabaseName);
+    }
+
+    public IMongoDatabase GetDb()
+    {
+        return _db;
     }
 }

@@ -13,23 +13,22 @@ namespace MicroBlog.Providers;
 
 public class ElasticSearchProvider: IElasticSearchProvider
 {
-    public ElasticsearchClient ElasticClient { get; }
+    private readonly ElasticsearchClient _client;
 
     public ElasticSearchProvider(IOptions<ElasticSearchSettings> elasticSearchSettings)
     {
-        var nodes = new[]
-        {
-            new Uri("http://elasticsearch_node_01:9200"),
-            new Uri("http://elasticsearch_node_02:9200"),
-            new Uri("http://elasticsearch_node_03:9200"),
-        };
-
+        var nodes = elasticSearchSettings.Value.ConnectionString.Select(x => new Uri(x)).ToList();
         var connectionPool = new StaticNodePool(nodes);
 
         var settings = new ElasticsearchClientSettings(connectionPool);
 
         var client = new ElasticsearchClient(settings);
         
-        ElasticClient = client;
+        _client = client;
+    }
+
+    public ElasticsearchClient GetClient()
+    {
+        return _client;
     }
 }

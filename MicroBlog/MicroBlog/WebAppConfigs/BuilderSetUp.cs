@@ -14,31 +14,55 @@ public static class BuilderSetUp
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
-        // mongo db configuration
-        builder.Services.Configure<MicroBlogDatabaseSettings>(
-            builder.Configuration.GetSection("MicroBlogDatabase"));
+        
         // datasets path configuration
         builder.Services.Configure<DatasetPathSettings>(
             builder.Configuration.GetSection("DatasetPath"));
         // expire policy
         builder.Services.Configure<UserAccountsExpirePolicySettings>(
             builder.Configuration.GetSection("UserAccountsExpirePolicy"));
+        
+        var mongoDbSection = "MicroBlogDatabase";
+        var elasticSearchSection = "ElasticSearch";
+        var memCacheSection = "MemCacheSettings";
+        var redisSection = "RedisSettings";
+        
+        // for development
+        if (builder.Environment.IsDevelopment())
+        {
+            // add for every postfix
+            mongoDbSection += "Dev";
+            elasticSearchSection += "Dev";
+            memCacheSection += "Dev";
+            redisSection += "Dev";
+        }
+        //Console.WriteLine($"mongoDbSection={mongoDbSection}");
+        // mongo db configuration
+        builder.Services.Configure<MicroBlogDatabaseSettings>(
+            builder.Configuration.GetSection(mongoDbSection));
         // elastic search configuration
         builder.Services.Configure<ElasticSearchSettings>(
-            builder.Configuration.GetSection("ElasticSearch"));
+            builder.Configuration.GetSection(elasticSearchSection));
+        // memcache configuration
+        builder.Services.Configure<MemCacheSettings>(
+            builder.Configuration.GetSection(memCacheSection));
+        // redis configuration
+        builder.Services.Configure<RedisSettings>(
+            builder.Configuration.GetSection(redisSection));
+        
+        builder.Services.AddEnyimMemcached(o => o.Servers =
+        [
+            new Server { Address = "localhost", Port = 11211 },
+            new Server { Address = "localhost", Port = 11212 },
+            new Server { Address = "localhost", Port = 11213 }
+        ]);
         
         builder.Services.AddSingleton<IMongoDbProvider, MongoDbProvider>();
+        builder.Services.AddSingleton<IMemCacheProvider, MemCacheProvider>();
+        builder.Services.AddSingleton<IRedisProvider, RedisProvider>();
+        builder.Services.AddSingleton<IElasticSearchProvider, ElasticSearchProvider>();
+        builder.Services.AddSingleton<IElasticSearchService, ElasticSearchService>();
         builder.Services.AddSingleton<IUserAccountsService, UserAccountsService>();
         builder.Services.AddSingleton<IMessagesService, MessagesService>();
-        builder.Services.AddSingleton<IRedisProvider>(new RedisProvider("redis:6379,allowAdmin=true"));
-        //builder.Services.AddSingleton<IElasticSearchProvider, ElasticSearchProvider>();
-        //builder.Services.AddSingleton<IElasticSearchService, ElasticSearchService>();
-        builder.Services.AddSingleton<ElasticSearchService>();
-        builder.Services.AddEnyimMemcached(o => o.Servers = new List<Server> { 
-            new Server { Address = "memcached_node_01", Port = 11211 },
-            new Server { Address = "memcached_node_02", Port = 11211 },
-            new Server { Address = "memcached_node_03", Port = 11211 },
-             });
-        builder.Services.AddSingleton<IMemCacheProvider, MemCacheProvider>();
     }
 }

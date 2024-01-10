@@ -15,7 +15,7 @@ public class MessagesService : IMessagesService
         IOptions<MicroBlogDatabaseSettings> databaseSettings)
     {
         var collectionName = databaseSettings.Value.MessagesCollectionName;
-        _messagesCollection = mongoDbProvider.MongoDatabase.GetCollection<Message>(collectionName);
+        _messagesCollection = mongoDbProvider.GetDb().GetCollection<Message>(collectionName);
     }
 
     public async Task<IEnumerable<Message>> GetAllAsync() =>
